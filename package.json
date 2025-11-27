@@ -4,8 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build --webpack && node scripts/fix-paths.js",
-    "export": "next build --webpack && node scripts/fix-paths.js",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "serve:out": "npx --yes serve out -p 3000"
