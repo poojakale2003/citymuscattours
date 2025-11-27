@@ -173,7 +173,7 @@ export default function PackagesPageClient() {
                 destination={travelPackage.destination}
                 duration={travelPackage.duration}
                 price={travelPackage.price}
-                currency="INR"
+                currency={travelPackage.currency ?? "INR"}
                 category={travelPackage.category}
                 rating={travelPackage.rating}
                 highlights={travelPackage.highlights}

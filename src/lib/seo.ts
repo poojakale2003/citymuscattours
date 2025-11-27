@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { PackageDetail } from "@/lib/packages";
+import { convertAmountToDisplayCurrency, displayCurrencyCode } from "@/lib/currency";
 
 export const siteName = "citymuscattours";
 export const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://citymuscattours.example.com";
@@ -155,10 +156,12 @@ export function buildPackageMetadata(travelPackage: PackageDetail): Metadata {
   const existingOther =
     (metadata.other as Record<string, string | number | (string | number)[]>) ?? {};
 
+  const displayPrice = convertAmountToDisplayCurrency(travelPackage.price, travelPackage.currency ?? "INR");
+
   metadata.other = {
     ...existingOther,
-    "product:price:amount": travelPackage.price.toString(),
-    "product:price:currency": travelPackage.currency ?? "INR",
+    "product:price:amount": displayPrice.toString(),
+    "product:price:currency": displayCurrencyCode,
   };
 
   if (travelPackage.reviews) {
@@ -174,6 +177,7 @@ export function buildPackageMetadata(travelPackage: PackageDetail): Metadata {
 export function buildPackageJsonLd(travelPackage: PackageDetail) {
   const description = travelPackage.overview ?? travelPackage.description ?? siteDescription;
   const url = absoluteUrl(travelPackage.detailPath ?? `/packages/${travelPackage.slug ?? travelPackage.id}`);
+  const displayPrice = convertAmountToDisplayCurrency(travelPackage.price, travelPackage.currency ?? "INR");
   const data: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "TouristTrip",
@@ -185,8 +189,8 @@ export function buildPackageJsonLd(travelPackage: PackageDetail) {
     offers: {
       "@type": "Offer",
       url,
-      price: travelPackage.price,
-      priceCurrency: travelPackage.currency ?? "INR",
+      price: displayPrice,
+      priceCurrency: displayCurrencyCode,
       availability: "https://schema.org/InStock",
       validFrom: new Date().toISOString(),
     },

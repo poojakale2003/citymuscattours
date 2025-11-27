@@ -1,4 +1,4 @@
-const DEFAULT_LOCALE = "en-IN";
+const DEFAULT_LOCALE = "en-OM";
 
 /**
  * Formats numeric values with a consistent locale so that SSR and CSR

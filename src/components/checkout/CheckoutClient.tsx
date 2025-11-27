@@ -340,8 +340,32 @@ export default function CheckoutClient({ data }: { data: CheckoutData }) {
         status: "Confirmed",
       });
 
+      // Send confirmation email (non-blocking for user flow)
+      if (contactDetails.email) {
+        try {
+          await api.sendBookingConfirmationEmail({
+            bookingId,
+            recipientEmail: contactDetails.email,
+            recipientName: contactDetails.name,
+            bookingDetails: {
+              packageName: data.packageTitle,
+              date: data.rawDate,
+              adults: data.adults,
+              children: data.children,
+              totalAmount,
+              currency: data.currency || "INR",
+              bookingReference: `#BK-${String(bookingId).padStart(4, "0")}`,
+            },
+          });
+        } catch (emailError) {
+          console.error("Failed to send confirmation email:", emailError);
+        }
+      }
+
       // Redirect to success page or show success message
-      alert("Booking confirmed! Your payment has been processed successfully.");
+      alert(
+        "Booking confirmed! Your payment has been processed successfully. A confirmation email has been sent to your inbox.",
+      );
       router.push("/");
     } catch (error: any) {
       console.error("Error processing booking:", error);

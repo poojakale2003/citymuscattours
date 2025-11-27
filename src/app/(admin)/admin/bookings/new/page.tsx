@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
+import { displayCurrencyCode } from "@/lib/currency";
 
 type Package = {
   id: number | string;
@@ -28,7 +29,7 @@ export default function AdminCreateBookingPage() {
     contactPhone: "",
     pickupLocation: "",
     notes: "",
-    currency: "INR",
+    currency: displayCurrencyCode,
   });
 
   useEffect(() => {
@@ -69,7 +70,7 @@ export default function AdminCreateBookingPage() {
       const packagePrice = (selectedPackage.offer_price ?? selectedPackage.price ?? 0) as number;
       const totalAmount = packagePrice * (formData.adults + formData.children * 0.5);
 
-      await api.createDummyBooking({
+      const bookingResponse = await api.createDummyBooking({
         packageId: formData.packageId,
         date: formData.date,
         adults: formData.adults,
@@ -82,7 +83,29 @@ export default function AdminCreateBookingPage() {
         notes: formData.notes,
       });
 
-      alert("Booking created successfully!");
+      const bookingId = bookingResponse.data?.id || bookingResponse.id;
+
+      if (bookingId && formData.contactEmail) {
+        try {
+          await api.sendBookingConfirmationEmail({
+            bookingId,
+            recipientEmail: formData.contactEmail,
+            bookingDetails: {
+              packageName: selectedPackage.name,
+              date: formData.date,
+              adults: formData.adults,
+              children: formData.children,
+              totalAmount,
+              currency: formData.currency,
+              bookingReference: `#BK-${String(bookingId).padStart(4, "0")}`,
+            },
+          });
+        } catch (emailError) {
+          console.error("Failed to send confirmation email:", emailError);
+        }
+      }
+
+      alert("Booking created successfully! A confirmation email has been sent to the traveler.");
       router.push("/admin/bookings");
     } catch (err: any) {
       console.error("Failed to create booking:", err);

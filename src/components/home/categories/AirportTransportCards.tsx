@@ -6,14 +6,9 @@ import { MouseEvent, useEffect, useMemo, useState } from "react";
 import { useWishlist } from "@/components/providers/WishlistProvider";
 import { useFilteredPackages } from "@/components/category/CategoryPageTemplate";
 import { formatNumber } from "@/lib/numbers";
+import { formatDisplayCurrency } from "@/lib/currency";
 import { api } from "@/lib/api";
 import { ApiPackage, normalizeApiPackage, NormalizedPackage } from "@/utils/packageTransformers";
-
-const inrFormatter = new Intl.NumberFormat("en-IN", {
-  style: "currency",
-  currency: "INR",
-  maximumFractionDigits: 0,
-});
 
 type AirportTransportCardsProps = {
   limit?: number;
@@ -75,7 +70,7 @@ export default function AirportTransportCards({ limit }: AirportTransportCardsPr
       destination: option.destination ?? "Airport transport",
       duration: option.duration,
       price: option.price,
-      currency: "INR",
+      currency: option.currency ?? "INR",
       rating: option.rating,
       highlights: option.highlights ?? [],
       image: option.image,
@@ -115,7 +110,7 @@ export default function AirportTransportCards({ limit }: AirportTransportCardsPr
     <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {displayedOptions.map((option) => {
         const detailId = option.slug ?? option.id;
-        const priceLabel = inrFormatter.format(option.price);
+        const priceLabel = formatDisplayCurrency(option.price, option.currency ?? "INR");
         const liked = mounted ? isWishlisted(detailId) : false;
         const badgeLabel = option.category.replace(/-/g, " ");
 

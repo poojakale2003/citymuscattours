@@ -6,14 +6,9 @@ import { MouseEvent, useEffect, useMemo, useState } from "react";
 import { useWishlist } from "@/components/providers/WishlistProvider";
 import { useFilteredPackages } from "@/components/category/CategoryPageTemplate";
 import { formatNumber } from "@/lib/numbers";
+import { formatDisplayCurrency } from "@/lib/currency";
 import { api } from "@/lib/api";
 import { ApiPackage, normalizeApiPackage, NormalizedPackage } from "@/utils/packageTransformers";
-
-const inrFormatter = new Intl.NumberFormat("en-IN", {
-  style: "currency",
-  currency: "INR",
-  maximumFractionDigits: 0,
-});
 
 type CarRentalCardsProps = {
   limit?: number;
@@ -75,7 +70,7 @@ export default function CarRentalCards({ limit }: CarRentalCardsProps) {
       destination: rental.destination ?? "Car rental",
       duration: rental.duration,
       price: rental.price,
-      currency: "INR",
+      currency: rental.currency ?? "INR",
       rating: rental.rating,
       highlights: rental.highlights ?? [],
       image: rental.image,
@@ -115,7 +110,7 @@ export default function CarRentalCards({ limit }: CarRentalCardsProps) {
     <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {displayedRentals.map((rental) => {
         const detailId = rental.slug ?? rental.id;
-        const priceLabel = inrFormatter.format(rental.price);
+        const priceLabel = formatDisplayCurrency(rental.price, rental.currency ?? "INR");
         const liked = mounted ? isWishlisted(detailId) : false;
         const badgeLabel = rental.category.replace(/-/g, " ");
 

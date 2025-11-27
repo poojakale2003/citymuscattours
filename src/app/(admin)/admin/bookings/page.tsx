@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
+import { formatDisplayCurrency } from "@/lib/currency";
 
 type Booking = {
   id: number;
@@ -29,7 +30,7 @@ const formatDate = (dateString?: string | null): string => {
   if (!dateString) return "—";
   try {
     const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
+    return date.toLocaleDateString("en-OM", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -39,11 +40,12 @@ const formatDate = (dateString?: string | null): string => {
   }
 };
 
-const currencyFormatter = new Intl.NumberFormat("en-IN", {
-  style: "currency",
-  currency: "INR",
-  maximumFractionDigits: 0,
-});
+const formatCurrency = (value?: number) => {
+  if (typeof value !== "number") {
+    return "—";
+  }
+  return formatDisplayCurrency(value, "INR");
+};
 
 // Map segment URL values to possible category name variations
 const segmentToCategoryMap: Record<string, string[]> = {
@@ -327,7 +329,7 @@ export default function AdminBookingsPage() {
                         {formatDate(booking.date)}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 font-semibold text-slate-900 sm:px-6">
-                        {booking.total_amount ? currencyFormatter.format(Math.round(booking.total_amount)) : "—"}
+                        {formatCurrency(booking.total_amount)}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 sm:px-6">
                         <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${getStatusColor(booking.status)}`}>

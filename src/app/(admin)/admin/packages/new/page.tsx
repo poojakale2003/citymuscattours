@@ -5,6 +5,7 @@ import type { ChangeEvent, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { formatNumber } from "@/lib/numbers";
 import { api } from "@/lib/api";
+import { displayCurrencyCode, formatDisplayCurrency } from "@/lib/currency";
 import { getToken, getRefreshToken } from "@/utils/auth";
 
 type PackageFormState = {
@@ -358,7 +359,7 @@ export default function AdminCreatePackagePage() {
         formData.append("destination", formState.destination.trim());
         formData.append("description", (formState.description || "").trim());
         formData.append("price", priceNumber.toString());
-        formData.append("currency", "INR");
+        formData.append("currency", displayCurrencyCode);
         if (formState.offerPrice) {
           formData.append("offerPrice", formState.offerPrice);
         }
@@ -492,7 +493,7 @@ export default function AdminCreatePackagePage() {
           destination: formState.destination,
           description: formState.description || "",
           price: priceNumber,
-          currency: "INR",
+          currency: displayCurrencyCode,
           offerPrice: formState.offerPrice ? parseInt(formState.offerPrice, 10) : undefined,
           duration: `${formState.durationDays} days${formState.durationNights ? ` ${formState.durationNights} nights` : ""}`,
           durationDays: formState.durationDays ? parseInt(formState.durationDays, 10) : undefined,
@@ -582,7 +583,7 @@ export default function AdminCreatePackagePage() {
         id: `pkg-${Date.now()}`,
         name: formState.tourName,
         category: formState.category,
-        price: `₹${formatNumber(priceNumber)}`,
+        price: formatDisplayCurrency(priceNumber, "INR"),
         status: "Draft" as const,
         createdAt: new Date().toISOString(),
         fullData: formState,
@@ -911,7 +912,7 @@ export default function AdminCreatePackagePage() {
 
             <div className="space-y-2">
               <label htmlFor="pricing" className="text-sm font-semibold text-slate-900">
-                Pricing (INR) *
+                Pricing ({displayCurrencyCode}) *
               </label>
               <input
                 id="pricing"
@@ -935,7 +936,7 @@ export default function AdminCreatePackagePage() {
 
             <div className="space-y-2">
               <label htmlFor="offerPrice" className="text-sm font-semibold text-slate-900">
-                Offer Price (INR)
+                Offer Price ({displayCurrencyCode})
               </label>
               <input
                 id="offerPrice"

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { api } from "@/lib/api";
+import { formatDisplayCurrency } from "@/lib/currency";
 
 type Booking = {
   id: number;
@@ -31,7 +32,7 @@ const formatDate = (dateString?: string | null): string => {
   if (!dateString) return "—";
   try {
     const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
+    return date.toLocaleDateString("en-OM", {
       year: "numeric",
       month: "long",
       day: "numeric",
@@ -45,7 +46,7 @@ const formatDateTime = (dateString?: string | null): string => {
   if (!dateString) return "—";
   try {
     const date = new Date(dateString);
-    return date.toLocaleString("en-US", {
+    return date.toLocaleString("en-OM", {
       year: "numeric",
       month: "long",
       day: "numeric",
@@ -57,11 +58,12 @@ const formatDateTime = (dateString?: string | null): string => {
   }
 };
 
-const currencyFormatter = new Intl.NumberFormat("en-IN", {
-  style: "currency",
-  currency: "INR",
-  maximumFractionDigits: 0,
-});
+const formatCurrency = (value?: number) => {
+  if (typeof value !== "number") {
+    return "—";
+  }
+  return formatDisplayCurrency(value, "INR");
+};
 
 export default function BookingDetailPage() {
   const router = useRouter();
@@ -242,7 +244,7 @@ export default function BookingDetailPage() {
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Total Amount</p>
                   <p className="mt-1 text-lg font-semibold text-slate-900">
-                    {booking.total_amount ? currencyFormatter.format(Math.round(booking.total_amount)) : "—"}
+                    {formatCurrency(booking.total_amount)}
                   </p>
                 </div>
               </div>

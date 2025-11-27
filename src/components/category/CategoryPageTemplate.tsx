@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ReactNode, createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import NewsletterSignup from "./NewsletterSignup";
 import { formatNumber } from "@/lib/numbers";
+import { displayCurrencyCode } from "@/lib/currency";
 
 const FilteredPackagesContext = createContext<{
   filteredPackageIds: string[];
@@ -559,7 +560,7 @@ export default function CategoryPageTemplate({ packages = [], children, compact 
                     <div className="grid gap-2">
                       <label className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Min. price</label>
                       <div className="flex items-center gap-2 rounded-2xl border border-slate-200 px-4 py-2">
-                        <span className="text-slate-400">₹</span>
+                        <span className="text-slate-400">{displayCurrencyCode}</span>
                         <input
                           type="number"
                           inputMode="numeric"
@@ -573,7 +574,7 @@ export default function CategoryPageTemplate({ packages = [], children, compact 
                     <div className="grid gap-2">
                       <label className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Max. price</label>
                       <div className="flex items-center gap-2 rounded-2xl border border-slate-200 px-4 py-2">
-                        <span className="text-slate-400">₹</span>
+                        <span className="text-slate-400">{displayCurrencyCode}</span>
                         <input
                           type="number"
                           inputMode="numeric"
@@ -584,7 +585,7 @@ export default function CategoryPageTemplate({ packages = [], children, compact 
                         />
                       </div>
                     </div>
-                    <p className="text-xs text-slate-500">Displayed in INR</p>
+                    <p className="text-xs text-slate-500">Displayed in OMR</p>
                   </div>
                 </FilterSection>
 

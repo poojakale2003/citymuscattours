@@ -23,8 +23,8 @@ export default function TermsPage() {
         <div>
           <h2 className="text-xl font-semibold text-slate-900">Payments &amp; Deposits</h2>
           <p>
-            Concierge invoices are issued in OMR or INR. Deposits confirm availability. Remaining balances are due 7 days
-            before arrival unless otherwise stated on your itinerary summary.
+            Concierge invoices are issued in OMR. Deposits confirm availability. Remaining balances are due 7 days before
+            arrival unless otherwise stated on your itinerary summary.
           </p>
         </div>
         <div>

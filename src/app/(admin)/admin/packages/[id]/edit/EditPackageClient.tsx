@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { formatNumber } from "@/lib/numbers";
 import { api } from "@/lib/api";
 import { getToken } from "@/utils/auth";
+import { displayCurrencyCode, formatDisplayCurrency } from "@/lib/currency";
 
 type PackageFormState = {
   // Tour Details
@@ -211,9 +212,8 @@ export default function EditPackageClient({ packageId }: EditPackageClientProps)
           // If fullData exists, use it; otherwise use basic fields
           const data = packageData.fullData || packageData;
           
-          // Extract price from formatted string (e.g., "₹2,899" -> "2899")
-          const priceMatch = packageData.price?.match(/[\d,]+/);
-          const extractedPrice = priceMatch ? priceMatch[0].replace(/,/g, "") : "";
+          // Extract price from formatted string (e.g., "OMR 2,899.500" -> "2899.500")
+          const extractedPrice = packageData.price ? packageData.price.replace(/[^\d.]/g, "") : "";
           
           setFormState({
             tourName: data.tourName || packageData.name || "",
@@ -381,7 +381,7 @@ export default function EditPackageClient({ packageId }: EditPackageClientProps)
             ...pkg,
             name: formState.tourName,
             category: formState.category,
-            price: `₹${formatNumber(priceNumber)}`,
+            price: formatDisplayCurrency(priceNumber, "INR"),
             fullData: formState,
           };
         }
@@ -625,7 +625,7 @@ export default function EditPackageClient({ packageId }: EditPackageClientProps)
 
             <div className="space-y-2">
               <label htmlFor="pricing" className="text-sm font-semibold text-slate-900">
-                Pricing (INR) *
+                Pricing ({displayCurrencyCode}) *
               </label>
               <input
                 id="pricing"
@@ -649,7 +649,7 @@ export default function EditPackageClient({ packageId }: EditPackageClientProps)
 
             <div className="space-y-2">
               <label htmlFor="offerPrice" className="text-sm font-semibold text-slate-900">
-                Offer Price (INR)
+                Offer Price ({displayCurrencyCode})
               </label>
               <input
                 id="offerPrice"

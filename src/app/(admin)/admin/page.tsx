@@ -6,6 +6,7 @@ import CategoryBookingsPanel from "@/components/dashboard/CategoryBookingsPanel"
 import { api } from "@/lib/api";
 import { formatNumber } from "@/lib/numbers";
 import { buildPackageImage } from "@/utils/packageTransformers";
+import { formatDisplayCurrency } from "@/lib/currency";
 
 type PackageRecord = {
   id: number | string;
@@ -37,17 +38,13 @@ const colorPalette = ["#0BA5EC", "#6366F1", "#10B981", "#F97316", "#EC4899", "#2
 const fallbackImage =
   "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=300&fit=crop&auto=format&q=80";
 
-const currencyFormatter = new Intl.NumberFormat("en-IN", {
-  style: "currency",
-  currency: "INR",
-  maximumFractionDigits: 0,
-});
-
-const dateFormatter = new Intl.DateTimeFormat("en-IN", {
+const dateFormatter = new Intl.DateTimeFormat("en-OM", {
   day: "2-digit",
   month: "short",
   year: "numeric",
 });
+
+const formatCurrency = (value: number) => formatDisplayCurrency(value, "INR");
 
 const toNumber = (value: unknown): number => {
   if (typeof value === "number") return value;
@@ -243,7 +240,7 @@ export default function AdminDashboardPage() {
       },
       {
         label: "Total Inventory Value",
-        value: currencyFormatter.format(Math.round(totalRevenue)),
+        value: formatCurrency(totalRevenue),
         delta: `${normalizedPackages.length ? "Live valuation" : "No inventory yet"}`,
         accent: "bg-gradient-to-r from-emerald-500/20 to-emerald-500/10",
       },
@@ -304,7 +301,7 @@ export default function AdminDashboardPage() {
   }, [normalizedPackages]);
 
   const maxTarget = Math.max(...earningsTrend.map((item) => item.target), 1);
-  const totalEarningsLabel = currencyFormatter.format(Math.round(totalRevenue));
+  const totalEarningsLabel = formatCurrency(totalRevenue);
 
   const recentlyAdded = useMemo(() => {
     const sorted = [...normalizedPackages]
@@ -337,7 +334,7 @@ export default function AdminDashboardPage() {
         id: `#INV-${pkg.id}`,
         date: formatDate(pkg.createdAt),
         customer: pkg.destination || pkg.category || "Travel Partner",
-        amount: currencyFormatter.format(Math.round(pkg.priceValue)),
+        amount: formatCurrency(pkg.priceValue),
       }));
   }, [normalizedPackages]);
 
@@ -370,7 +367,7 @@ export default function AdminDashboardPage() {
           product: booking.package_name || "Package",
           guest: booking.contact_email ? `Email · ${booking.contact_email}` : "Guest",
           days: booking.date ? formatDate(booking.date) : "Flexible",
-          price: booking.total_amount ? currencyFormatter.format(Math.round(booking.total_amount)) : "—",
+          price: booking.total_amount ? formatCurrency(booking.total_amount) : "—",
           bookedOn: formatDate(booking.created_at),
           status: booking.status || "Pending",
         }));
@@ -389,7 +386,7 @@ export default function AdminDashboardPage() {
         product: pkg.name,
         guest: pkg.destination ? `Destination · ${pkg.destination}` : "Package detail",
         days: pkg.start_date && pkg.end_date ? `${formatDate(pkg.start_date)} - ${formatDate(pkg.end_date)}` : "Flexible",
-        price: currencyFormatter.format(Math.round(pkg.priceValue)),
+        price: formatCurrency(pkg.priceValue),
         bookedOn: formatDate(pkg.createdAt),
         status: pkg.isFeatured ? "Featured" : index % 2 === 0 ? "Ready" : "Upcoming",
       }));
@@ -447,7 +444,7 @@ export default function AdminDashboardPage() {
         traveler: booking.contact_email || booking.contact_phone || "Guest",
         package: booking.package_name || "Package",
         status: booking.status || "Pending",
-        amount: booking.total_amount ? currencyFormatter.format(Math.round(booking.total_amount)) : "—",
+        amount: booking.total_amount ? formatCurrency(booking.total_amount) : "—",
         date: formatDate(booking.date || booking.created_at),
         dateValue: dateValue, // Store timestamp for sorting
       });

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { api } from "@/lib/api";
+import { formatDisplayCurrency } from "@/lib/currency";
 
 type Package = {
   id: number;
@@ -172,7 +173,7 @@ export default function ArchivedPackagesPage() {
 
   const formatPrice = (price: number, offerPrice?: number) => {
     const displayPrice = offerPrice && offerPrice > 0 ? offerPrice : price;
-    return `₹${displayPrice.toLocaleString('en-IN')}`;
+    return formatDisplayCurrency(displayPrice, "INR");
   };
 
   return (

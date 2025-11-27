@@ -1,4 +1,5 @@
 import { categoryDetails, categoryPackages, featuredPackages } from "@/lib/data";
+import { formatDisplayCurrency } from "@/lib/currency";
 
 export type PackageCategoryKey = keyof typeof categoryDetails;
 export type PackageCategory = PackageCategoryKey | "featured";
@@ -189,10 +190,6 @@ export function getAllPackages(): PackageDetail[] {
 }
 
 export function formatCurrency(amount: number, currency: string): string {
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(amount);
+  return formatDisplayCurrency(amount, currency);
 }
 

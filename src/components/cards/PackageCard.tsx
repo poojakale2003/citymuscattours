@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { KeyboardEvent, MouseEvent } from "react";
 import { useWishlist } from "@/components/providers/WishlistProvider";
 import { formatNumber } from "@/lib/numbers";
+import { formatDisplayCurrency } from "@/lib/currency";
 
 type PackageCardProps = {
   id: string;
@@ -35,14 +36,7 @@ export default function PackageCard({
 }: PackageCardProps) {
   const router = useRouter();
   const detailHref = detailPath ?? `/packages/${id}`;
-  const priceLabel =
-    currency === "INR"
-      ? new Intl.NumberFormat("en-IN", {
-          style: "currency",
-          currency: "INR",
-          maximumFractionDigits: 0,
-        }).format(price)
-      : `$${formatNumber(price, undefined, "en-US")}`;
+  const priceLabel = formatDisplayCurrency(price, currency);
 
   const handleNavigation = () => {
     router.push(detailHref);

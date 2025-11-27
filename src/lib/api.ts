@@ -1547,6 +1547,30 @@ export const api = {
 
   getBooking: (id: string) => request<BookingResponse>(`/bookings/${id}`, {}, true),
 
+  // Emails
+  sendBookingConfirmationEmail: (payload: {
+    bookingId: string | number;
+    recipientEmail: string;
+    recipientName?: string;
+    bookingDetails?: {
+      packageName?: string;
+      date?: string;
+      adults?: number;
+      children?: number;
+      totalAmount?: number;
+      currency?: string;
+      bookingReference?: string;
+    };
+  }) =>
+    request<{ success: boolean; message: string }>(
+      "/bookings/send-confirmation-email",
+      {
+        method: "POST",
+        body: JSON.stringify(payload),
+      },
+      true,
+    ),
+
   checkBookingAvailability: (payload: {
     packageId: string;
     date: string;

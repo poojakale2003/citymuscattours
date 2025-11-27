@@ -1131,7 +1131,7 @@ export default function PackageDetail({
                 destination={pkg.destination}
                 duration={pkg.duration}
                 price={pkg.price}
-                currency="INR"
+                currency={pkg.currency ?? "INR"}
                 category={pkg.category}
                 rating={pkg.rating}
                 highlights={pkg.highlights}

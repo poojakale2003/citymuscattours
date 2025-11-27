@@ -15,6 +15,7 @@ export type ApiPackage = {
   duration_nights?: MaybeString;
   price?: MaybeString;
   offer_price?: MaybeString;
+  currency?: MaybeString;
   highlights?: unknown;
   feature_image?: string | null;
   rating?: MaybeString;
@@ -54,6 +55,7 @@ export type NormalizedPackage = {
   destination: string;
   duration: string;
   price: number;
+  currency?: string;
   category: string;
   rating: number;
   highlights: string[];
@@ -232,6 +234,13 @@ export const normalizeApiPackage = (pkg: ApiPackage): NormalizedPackage => {
   const price =
     toPositiveNumber(pkg.offer_price ?? pkg.price ?? 0) || toPositiveNumber(pkg.price ?? 0) || 0;
 
+  const currencyCode =
+    typeof pkg.currency === "string"
+      ? pkg.currency.trim()
+      : typeof pkg.currency === "number"
+        ? String(pkg.currency)
+        : undefined;
+
   return {
     id: String(pkg.id ?? ""),
     slug: typeof pkg.slug === "string" ? pkg.slug : undefined,
@@ -240,6 +249,7 @@ export const normalizeApiPackage = (pkg: ApiPackage): NormalizedPackage => {
     destination: deriveDestination(pkg),
     duration: formatPackageDuration(pkg),
     price,
+    currency: currencyCode || "INR",
     category: pkg.category?.trim() || "experiences",
     rating: Number(pkg.rating ?? 4.8) || 4.8,
     highlights: normalizedHighlights,

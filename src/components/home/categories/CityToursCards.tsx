@@ -6,14 +6,9 @@ import { MouseEvent, useEffect, useMemo, useState } from "react";
 import { useWishlist } from "@/components/providers/WishlistProvider";
 import { useFilteredPackages } from "@/components/category/CategoryPageTemplate";
 import { formatNumber } from "@/lib/numbers";
+import { formatDisplayCurrency } from "@/lib/currency";
 import { api } from "@/lib/api";
 import { ApiPackage, normalizeApiPackage, NormalizedPackage } from "@/utils/packageTransformers";
-
-const inrFormatter = new Intl.NumberFormat("en-IN", {
-  style: "currency",
-  currency: "INR",
-  maximumFractionDigits: 0,
-});
 
 type CityToursCardsProps = {
   limit?: number;
@@ -75,7 +70,7 @@ export default function CityToursCards({ limit }: CityToursCardsProps) {
       destination: tour.destination ?? "City tour",
       duration: tour.duration,
       price: tour.price,
-      currency: "INR",
+      currency: tour.currency ?? "INR",
       rating: tour.rating,
       highlights: tour.highlights ?? [],
       image: tour.image,
@@ -115,7 +110,7 @@ export default function CityToursCards({ limit }: CityToursCardsProps) {
     <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {displayedTours.map((tour) => {
         const detailId = tour.slug ?? tour.id;
-        const priceLabel = inrFormatter.format(tour.price);
+        const priceLabel = formatDisplayCurrency(tour.price, tour.currency ?? "INR");
         const liked = mounted ? isWishlisted(detailId) : false;
         const badgeLabel = tour.category.replace(/-/g, " ");
 

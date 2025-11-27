@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { api } from "@/lib/api";
+import { formatDisplayCurrency } from "@/lib/currency";
 
 type Notification = {
   id: string;
@@ -25,7 +26,7 @@ const formatRelativeTime = (date: Date): string => {
   if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? "s" : ""} ago`;
   if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
   if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  return date.toLocaleDateString("en-OM", { month: "short", day: "numeric", year: "numeric" });
 };
 
 const typeColors = {
@@ -83,7 +84,9 @@ export default function NotificationsPage() {
           
           if (booking.payment_status === "paid") {
             title = "Payment Received";
-            message = `Payment of ${booking.total_amount ? `₹${Math.round(booking.total_amount)}` : "amount"} received for booking #BK-${String(booking.id).padStart(4, "0")}`;
+            message = `Payment of ${
+              booking.total_amount ? formatDisplayCurrency(booking.total_amount, booking.currency ?? "INR") : "amount"
+            } received for booking #BK-${String(booking.id).padStart(4, "0")}`;
             priority = "high";
           } else if (booking.status?.toLowerCase() === "cancelled") {
             title = "Booking Cancelled";
