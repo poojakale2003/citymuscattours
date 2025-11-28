@@ -117,6 +117,10 @@ export default function AdminDashboardPage() {
                 ? booking.id
                 : Number(booking._id) || Number((booking as any).booking_id) || index + 1;
 
+            // Parse total_amount to ensure it's a number
+            const rawTotalAmount = booking.total_amount ?? booking.totalAmount ?? 0;
+            const parsedTotalAmount = toNumber(rawTotalAmount);
+            
             return {
               id: normalizedId,
               package_name:
@@ -135,7 +139,7 @@ export default function AdminDashboardPage() {
               travelers: booking.travelers ?? booking.adults + (booking.children ?? 0),
               adults: booking.adults,
               children: booking.children,
-              total_amount: booking.total_amount ?? booking.totalAmount,
+              total_amount: parsedTotalAmount > 0 ? parsedTotalAmount : undefined,
               status: booking.status,
               payment_status: booking.payment_status ?? booking.paymentStatus,
               created_at: booking.created_at ?? booking.createdAt ?? booking.date,
@@ -367,7 +371,7 @@ export default function AdminDashboardPage() {
           product: booking.package_name || "Package",
           guest: booking.contact_email ? `Email · ${booking.contact_email}` : "Guest",
           days: booking.date ? formatDate(booking.date) : "Flexible",
-          price: booking.total_amount ? formatCurrency(booking.total_amount) : "—",
+          price: booking.total_amount && booking.total_amount > 0 ? formatCurrency(booking.total_amount) : "—",
           bookedOn: formatDate(booking.created_at),
           status: booking.status || "Pending",
         }));
@@ -444,7 +448,7 @@ export default function AdminDashboardPage() {
         traveler: booking.contact_email || booking.contact_phone || "Guest",
         package: booking.package_name || "Package",
         status: booking.status || "Pending",
-        amount: booking.total_amount ? formatCurrency(booking.total_amount) : "—",
+        amount: booking.total_amount && booking.total_amount > 0 ? formatCurrency(booking.total_amount) : "—",
         date: formatDate(booking.date || booking.created_at),
         dateValue: dateValue, // Store timestamp for sorting
       });

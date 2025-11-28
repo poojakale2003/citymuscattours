@@ -20,14 +20,14 @@ export const convertAmountToDisplayCurrency = (value: number, currency: string =
     return 0;
   }
 
+  // Display exact value from database in OMR (no conversion)
+  // If currency is already OMR, return as is
   if (currency === DISPLAY_CURRENCY_CODE) {
     return value;
   }
 
-  if (currency === "INR") {
-    return value * INR_TO_OMR_RATE;
-  }
-
+  // For INR or any other currency, return the same value (no conversion)
+  // This displays the exact database price in OMR format
   return value;
 };
 

@@ -59,7 +59,7 @@ const formatDateTime = (dateString?: string | null): string => {
 };
 
 const formatCurrency = (value?: number) => {
-  if (typeof value !== "number") {
+  if (typeof value !== "number" || value <= 0 || isNaN(value)) {
     return "—";
   }
   return formatDisplayCurrency(value, "INR");
@@ -81,12 +81,30 @@ export default function BookingDetailPage() {
     }
   }, [bookingId]);
 
+  const toNumber = (value: unknown): number => {
+    if (typeof value === "number") return value;
+    if (typeof value === "string") {
+      const parsed = parseFloat(value);
+      return Number.isNaN(parsed) ? 0 : parsed;
+    }
+    return 0;
+  };
+
   const loadBooking = async () => {
     try {
       setLoading(true);
       setError(null);
       const response = await api.getBooking(bookingId);
-      const bookingData = response.data || response;
+      const rawBooking = response.data || response;
+      
+      // Normalize booking and parse total_amount
+      const bookingData: Booking = {
+        ...rawBooking,
+        total_amount: rawBooking.total_amount !== undefined && rawBooking.total_amount !== null 
+          ? toNumber(rawBooking.total_amount) 
+          : undefined,
+      };
+      
       setBooking(bookingData);
     } catch (err: any) {
       console.error("Error loading booking:", err);

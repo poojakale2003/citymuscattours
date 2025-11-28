@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { api } from "@/lib/api";
 import Image from "next/image";
 
 export default function NewsletterSignup() {
@@ -8,6 +9,7 @@ export default function NewsletterSignup() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -15,17 +17,30 @@ export default function NewsletterSignup() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!email) return;
     setIsSubmitting(true);
-    
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    
-    setSubmitted(true);
-    setIsSubmitting(false);
-    setEmail("");
-    
-    // Reset success message after 3 seconds
-    setTimeout(() => setSubmitted(false), 3000);
+    setError(null);
+
+    try {
+      await api.subscribeNewsletter({
+        email,
+        source: "discover-weekly-section",
+      });
+
+      setSubmitted(true);
+      setEmail("");
+
+      // Reset success message after 3 seconds
+      setTimeout(() => setSubmitted(false), 3000);
+    } catch (err: any) {
+      const message =
+        err?.message ||
+        err?.response?.data?.message ||
+        "Unable to subscribe right now. Please try again.";
+      setError(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -91,6 +106,11 @@ export default function NewsletterSignup() {
                     >
                       {isSubmitting ? "Signing up..." : "Sign up"}
                     </button>
+                    {error && (
+                      <p className="text-xs text-red-600 sm:text-sm">
+                        {error}
+                      </p>
+                    )}
                   </form>
                 ) : (
                   <div className="flex flex-col gap-2.5 sm:gap-3 sm:flex-row">

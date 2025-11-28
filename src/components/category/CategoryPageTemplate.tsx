@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ReactNode, createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import NewsletterSignup from "./NewsletterSignup";
 import { formatNumber } from "@/lib/numbers";
-import { displayCurrencyCode } from "@/lib/currency";
+import { displayCurrencyCode, formatDisplayCurrency } from "@/lib/currency";
 
 const FilteredPackagesContext = createContext<{
   filteredPackageIds: string[];
@@ -786,7 +786,7 @@ export default function CategoryPageTemplate({ packages = [], children, compact 
                   <div className="flex flex-col items-start gap-3 border-t border-slate-200 pt-6 text-sm text-slate-500 md:flex-row md:items-center md:justify-between">
                     <span>
                       <span className="text-xl font-semibold text-slate-900">
-                        ${formatNumber(travelPackage.price)}
+                        {formatDisplayCurrency(travelPackage.price, "INR")}
                       </span>{" "}
                       <span className="text-xs">· {travelPackage.duration}</span>
                     </span>

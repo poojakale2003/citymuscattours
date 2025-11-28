@@ -41,7 +41,7 @@ const formatDate = (dateString?: string | null): string => {
 };
 
 const formatCurrency = (value?: number) => {
-  if (typeof value !== "number") {
+  if (typeof value !== "number" || value <= 0 || isNaN(value)) {
     return "—";
   }
   return formatDisplayCurrency(value, "INR");
@@ -79,12 +79,30 @@ export default function AdminBookingsPage() {
     setCurrentPage(1);
   }, [searchTerm, statusFilter, paymentFilter, activeSegmentVariations]);
 
+  const toNumber = (value: unknown): number => {
+    if (typeof value === "number") return value;
+    if (typeof value === "string") {
+      const parsed = parseFloat(value);
+      return Number.isNaN(parsed) ? 0 : parsed;
+    }
+    return 0;
+  };
+
   const loadBookings = async () => {
     try {
       setLoading(true);
       setError(null);
       const response = (await api.getBookings()) as BookingsApiResponse;
-      const bookingsData: Booking[] = Array.isArray(response) ? response : response.data || [];
+      const rawBookings = Array.isArray(response) ? response : response.data || [];
+      
+      // Normalize bookings and parse total_amount
+      const bookingsData: Booking[] = rawBookings.map((booking: any) => ({
+        ...booking,
+        total_amount: booking.total_amount !== undefined && booking.total_amount !== null 
+          ? toNumber(booking.total_amount) 
+          : undefined,
+      }));
+      
       setBookings(bookingsData);
       
       // Debug: Log unique categories to help identify the format

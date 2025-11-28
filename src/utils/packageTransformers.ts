@@ -68,7 +68,11 @@ const toNumber = (value: MaybeString, fallback = 0): number => {
     return Number.isFinite(value) ? value : fallback;
   }
   if (typeof value === "string") {
-    const parsed = parseFloat(value);
+    const trimmed = value.trim();
+    if (trimmed === "" || trimmed === "null") {
+      return fallback;
+    }
+    const parsed = parseFloat(trimmed);
     return Number.isFinite(parsed) ? parsed : fallback;
   }
   return fallback;
@@ -76,7 +80,8 @@ const toNumber = (value: MaybeString, fallback = 0): number => {
 
 const toPositiveNumber = (value: MaybeString, fallback = 0): number => {
   const parsed = toNumber(value, fallback);
-  return parsed > 0 ? parsed : fallback;
+  // Round to 2 decimal places to preserve precision from database
+  return parsed > 0 ? Math.round(parsed * 100) / 100 : fallback;
 };
 
 export const buildPackageImage = (path?: string | null): string => {
@@ -231,8 +236,11 @@ export const normalizeApiPackage = (pkg: ApiPackage): NormalizedPackage => {
   const highlights = parsePackageHighlights(pkg.highlights);
   const normalizedHighlights =
     highlights.length > 0 ? highlights : ["Private concierge support", "Flexible departures"];
-  const price =
-    toPositiveNumber(pkg.offer_price ?? pkg.price ?? 0) || toPositiveNumber(pkg.price ?? 0) || 0;
+  // Get price with proper precision handling
+  // Prefer offer_price if available, otherwise use regular price
+  const offerPrice = toPositiveNumber(pkg.offer_price);
+  const regularPrice = toPositiveNumber(pkg.price);
+  const price = offerPrice > 0 ? offerPrice : (regularPrice > 0 ? regularPrice : 0);
 
   const currencyCode =
     typeof pkg.currency === "string"

@@ -64,10 +64,20 @@ export default function AdminPackagesPage() {
       setError(null);
       // Explicitly request non-archived packages (archived: false)
       const response = await api.getPackages({ archived: false });
-      const normalizedPackages = (response.data || []).map((pkg: any) => ({
-        ...pkg,
-        is_archived: parseIsArchived(pkg.is_archived ?? pkg.isArchived),
-      }));
+      const normalizedPackages = (response.data || []).map((pkg: any) => {
+        // Ensure prices are properly parsed as numbers
+        const price = typeof pkg.price === 'string' ? parseFloat(pkg.price) : (typeof pkg.price === 'number' ? pkg.price : 0);
+        const offerPrice = pkg.offer_price 
+          ? (typeof pkg.offer_price === 'string' ? parseFloat(pkg.offer_price) : (typeof pkg.offer_price === 'number' ? pkg.offer_price : undefined))
+          : undefined;
+        
+        return {
+          ...pkg,
+          price: isNaN(price) ? 0 : price,
+          offer_price: offerPrice !== undefined && !isNaN(offerPrice) ? offerPrice : undefined,
+          is_archived: parseIsArchived(pkg.is_archived ?? pkg.isArchived),
+        };
+      });
       const nonArchivedPackages = normalizedPackages.filter((pkg: Package) => !pkg.is_archived);
       setPackages(nonArchivedPackages);
     } catch (err: any) {
@@ -154,9 +164,20 @@ export default function AdminPackagesPage() {
     return filteredPackages.slice(start, start + ITEMS_PER_PAGE);
   }, [filteredPackages, currentPage]);
 
+  // Format price for admin display - show exact price from database in OMR
   const formatPrice = (price: number, offerPrice?: number) => {
     const displayPrice = offerPrice && offerPrice > 0 ? offerPrice : price;
-    return formatDisplayCurrency(displayPrice, "INR");
+    // In admin panel, show the exact price from database in OMR (no conversion)
+    if (displayPrice <= 0 || isNaN(displayPrice)) {
+      return "OMR 0.000";
+    }
+    // Format as OMR with 3 decimal places (OMR standard)
+    return new Intl.NumberFormat("en-OM", {
+      style: "currency",
+      currency: "OMR",
+      minimumFractionDigits: 3,
+      maximumFractionDigits: 3,
+    }).format(displayPrice);
   };
 
   return (

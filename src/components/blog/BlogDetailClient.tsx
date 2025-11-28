@@ -21,7 +21,7 @@ interface Blog {
   updated_at: string;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost/php-backend/api";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://citymuscattours.com/test/php-backend/api/";
 const UPLOAD_BASE_URL = API_BASE_URL.replace(/\/api\/?$/, "");
 
 // Helper function to build full image URL from relative path

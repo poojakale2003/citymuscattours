@@ -1966,5 +1966,178 @@ export const api = {
       }
     }
   },
+
+  // Testimonials
+  getTestimonials: (params?: {
+    page?: number;
+    limit?: number;
+    active?: boolean;
+    search?: string;
+  }) => {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append("page", String(params.page));
+    if (params?.limit) queryParams.append("limit", String(params.limit));
+    if (params?.active !== undefined) queryParams.append("active", String(params.active));
+    if (params?.search) queryParams.append("search", params.search);
+    
+    const query = queryParams.toString();
+    return request<{
+      data: Array<{
+        id: number;
+        name: string;
+        location: string;
+        avatar: string | null;
+        quote: string;
+        rating: number;
+        is_active: boolean;
+        display_order: number;
+        created_at: string;
+        updated_at: string;
+      }>;
+      pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        pages: number;
+      };
+    }>(`/testimonials${query ? `?${query}` : ""}`);
+  },
+
+  getTestimonial: async (id: string | number) => {
+    const response = await request<{
+      data: {
+        id: number;
+        name: string;
+        location: string;
+        avatar: string | null;
+        quote: string;
+        rating: number;
+        is_active: boolean;
+        display_order: number;
+        created_at: string;
+        updated_at: string;
+      };
+    }>(`/testimonials/${id}`);
+    return response.data;
+  },
+
+  createTestimonial: async (payload: FormData | {
+    name: string;
+    location: string;
+    avatar?: string | null;
+    quote: string;
+    rating?: number;
+    is_active?: boolean;
+    display_order?: number;
+  }) => {
+    // If payload is FormData, send as multipart/form-data
+    if (payload instanceof FormData) {
+      const token = getToken();
+      const headers: HeadersInit = {};
+      // Don't set Content-Type for FormData - browser will set it with boundary
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+      
+      return fetch(`${API_BASE_URL}/testimonials`, {
+        method: "POST",
+        headers,
+        body: payload,
+        credentials: "include",
+      }).then(async (response) => {
+        if (!response.ok) {
+          const errorText = await response.text();
+          let errorMessage = "Failed to create testimonial";
+          try {
+            const errorData = JSON.parse(errorText);
+            errorMessage = errorData.message || errorMessage;
+          } catch {
+            errorMessage = errorText || errorMessage;
+          }
+          throw new Error(errorMessage);
+        }
+        return response.json();
+      });
+    }
+    
+    // Otherwise, send as JSON
+    return request<{
+      id: number;
+      name: string;
+      location: string;
+      avatar: string | null;
+      quote: string;
+      rating: number;
+      is_active: boolean;
+      display_order: number;
+      created_at: string;
+      updated_at: string;
+    }>("/testimonials", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }, true);
+  },
+
+  updateTestimonial: async (id: string | number, payload: FormData | {
+    name?: string;
+    location?: string;
+    avatar?: string | null;
+    quote?: string;
+    rating?: number;
+    is_active?: boolean;
+    display_order?: number;
+  }) => {
+    // If payload is FormData, send as multipart/form-data
+    if (payload instanceof FormData) {
+      const token = getToken();
+      const headers: HeadersInit = {};
+      // Don't set Content-Type for FormData - browser will set it with boundary
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+      
+      return fetch(`${API_BASE_URL}/testimonials/${id}`, {
+        method: "PUT",
+        headers,
+        body: payload,
+        credentials: "include",
+      }).then(async (response) => {
+        if (!response.ok) {
+          const errorText = await response.text();
+          let errorMessage = "Failed to update testimonial";
+          try {
+            const errorData = JSON.parse(errorText);
+            errorMessage = errorData.message || errorMessage;
+          } catch {
+            errorMessage = errorText || errorMessage;
+          }
+          throw new Error(errorMessage);
+        }
+        return response.json();
+      });
+    }
+    
+    // Otherwise, send as JSON
+    return request<{
+      id: number;
+      name: string;
+      location: string;
+      avatar: string | null;
+      quote: string;
+      rating: number;
+      is_active: boolean;
+      display_order: number;
+      created_at: string;
+      updated_at: string;
+    }>(`/testimonials/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    }, true);
+  },
+
+  deleteTestimonial: (id: string | number) =>
+    request<{ message: string }>(`/testimonials/${id}`, {
+      method: "DELETE",
+    }, true),
 };
 

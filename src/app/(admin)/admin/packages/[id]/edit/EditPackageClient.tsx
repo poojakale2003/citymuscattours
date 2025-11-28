@@ -156,8 +156,6 @@ const getTodayDate = (): string => {
   return `${year}-${month}-${day}`;
 };
 
-const STORAGE_KEY = "admin_packages";
-
 type EditPackageClientProps = {
   packageId: string;
 };
@@ -198,61 +196,120 @@ export default function EditPackageClient({ packageId }: EditPackageClientProps)
     description: "",
   });
 
-  // Load package data
+  // Helper function to parse JSON fields from API
+  const parseJsonField = (value: unknown, fallback: any[] = []): any[] => {
+    if (Array.isArray(value)) {
+      return value;
+    }
+    if (typeof value === "string") {
+      if (!value.trim()) {
+        return fallback;
+      }
+      try {
+        const parsed = JSON.parse(value);
+        return Array.isArray(parsed) ? parsed : fallback;
+      } catch {
+        return fallback;
+      }
+    }
+    return fallback;
+  };
+
+  // Helper function to parse structured fields (itinerary, faq)
+  const parseStructuredField = (value: unknown): Array<{ day?: string; title?: string; description?: string; question?: string; answer?: string }> => {
+    if (Array.isArray(value)) {
+      return value;
+    }
+    if (typeof value === "string") {
+      if (!value.trim()) {
+        return [];
+      }
+      try {
+        const parsed = JSON.parse(value);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  };
+
+  // Load package data from API
   useEffect(() => {
     if (!packageId) return;
     
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
+    const loadPackage = async () => {
       try {
-        const parsed = JSON.parse(stored);
-        const packageData = parsed.find((pkg: any) => pkg.id === packageId);
+        setIsLoading(true);
+        setError(null);
         
-        if (packageData) {
-          // If fullData exists, use it; otherwise use basic fields
-          const data = packageData.fullData || packageData;
-          
-          // Extract price from formatted string (e.g., "OMR 2,899.500" -> "2899.500")
-          const extractedPrice = packageData.price ? packageData.price.replace(/[^\d.]/g, "") : "";
-          
-          setFormState({
-            tourName: data.tourName || packageData.name || "",
-            category: data.category || packageData.category || categories[0],
-            startDate: data.startDate || "",
-            endDate: data.endDate || "",
-            destination: data.destination || "",
-            durationDays: data.durationDays || "",
-            durationNights: data.durationNights || "",
-            totalPeople: data.totalPeople || "",
-            pricing: extractedPrice || data.pricing || "",
-            offerPrice: data.offerPrice || "",
-            minAge: data.minAge || "",
-            country: data.country || "Oman",
-            city: data.city || "",
-            state: data.state || "",
-            zipCode: data.zipCode || "",
-            address: data.address || "",
-            address1: data.address1 || "",
-            highlights: data.highlights || [],
-            activities: data.activities || [],
-            includes: data.includes || [],
-            excludes: data.excludes || [],
-            itinerary: data.itinerary && data.itinerary.length > 0 ? data.itinerary : [{ day: "Day 1", title: "", description: "" }],
-            faqs: data.faqs && data.faqs.length > 0 ? data.faqs : [{ question: "", answer: "" }],
-            galleryImages: [],
-            featureImage: null,
-            description: data.description || "",
-          });
-        } else {
+        const response = await api.getPackage(packageId);
+        const pkg = response.data;
+        
+        if (!pkg) {
           setError("Package not found");
+          setIsLoading(false);
+          return;
         }
-      } catch (err) {
-        setError("Failed to load package data");
+
+        // Parse JSON fields
+        const highlights = parseJsonField(pkg.highlights, []);
+        const activities = parseJsonField(pkg.activities, []);
+        const includes = parseJsonField(pkg.includes, []);
+        const excludes = parseJsonField(pkg.excludes, []);
+        const itinerary = parseStructuredField(pkg.itinerary);
+        const faqs = parseStructuredField(pkg.faq);
+        const images = parseJsonField(pkg.images, []);
+        
+        // Format dates (YYYY-MM-DD)
+        const formatDate = (dateStr: string | null | undefined): string => {
+          if (!dateStr) return "";
+          try {
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) return "";
+            return date.toISOString().split("T")[0];
+          } catch {
+            return "";
+          }
+        };
+
+        setFormState({
+          tourName: pkg.name || "",
+          category: pkg.category || categories[0],
+          startDate: formatDate(pkg.start_date),
+          endDate: formatDate(pkg.end_date),
+          destination: pkg.destination || "",
+          durationDays: pkg.duration_days ? String(pkg.duration_days) : "",
+          durationNights: pkg.duration_nights ? String(pkg.duration_nights) : "",
+          totalPeople: pkg.total_people_allotted ? String(pkg.total_people_allotted) : "",
+          pricing: pkg.price ? String(pkg.price) : "",
+          offerPrice: pkg.offer_price ? String(pkg.offer_price) : "",
+          minAge: pkg.min_age ? String(pkg.min_age) : "",
+          country: pkg.country || "Oman",
+          city: pkg.city || "",
+          state: pkg.state || "",
+          zipCode: pkg.zip_code || "",
+          address: pkg.address || "",
+          address1: pkg.address1 || "",
+          highlights: highlights.length > 0 ? highlights : [],
+          activities: activities.length > 0 ? activities : [],
+          includes: includes.length > 0 ? includes : [],
+          excludes: excludes.length > 0 ? excludes : [],
+          itinerary: itinerary.length > 0 ? itinerary : [{ day: "Day 1", title: "", description: "" }],
+          faqs: faqs.length > 0 ? faqs : [{ question: "", answer: "" }],
+          galleryImages: [], // Gallery images are for new uploads only
+          featureImage: null, // Feature image is for new upload only
+          description: pkg.description || "",
+        });
+      } catch (err: any) {
+        console.error("Error loading package:", err);
+        setError(err.message || "Failed to load package data");
+      } finally {
+        setIsLoading(false);
       }
-    } else {
-      setError("Package not found");
-    }
-    setIsLoading(false);
+    };
+
+    loadPackage();
   }, [packageId]);
 
   const handleChange =
@@ -367,28 +424,106 @@ export default function EditPackageClient({ packageId }: EditPackageClientProps)
       }
 
       // Prepare package data
-      const offerPriceValue = parseInt(formState.offerPrice || "0", 10);
-      const basePriceValue = parseInt(formState.pricing || "0", 10);
+      const offerPriceValue = parseFloat(formState.offerPrice || "0");
+      const basePriceValue = parseFloat(formState.pricing || "0");
       const priceNumber = formState.offerPrice && offerPriceValue > 0 ? offerPriceValue : basePriceValue;
 
-      // Update localStorage
-      const stored = localStorage.getItem(STORAGE_KEY);
-      const existingPackages = stored ? JSON.parse(stored) : [];
-      
-      const updatedPackages = existingPackages.map((pkg: any) => {
-        if (pkg.id === packageId) {
-          return {
-            ...pkg,
-            name: formState.tourName,
-            category: formState.category,
-            price: formatDisplayCurrency(priceNumber, "INR"),
-            fullData: formState,
-          };
-        }
-        return pkg;
-      });
+      // Map category to backend format
+      const categoryMap: Record<string, string> = {
+        "City Tours": "city-tours",
+        "Car Rental": "car-rental",
+        "Airport Transport": "airport-transport",
+        "Cruises & Stays": "cruises-stays",
+        "Experiences": "experiences",
+      };
+      const backendCategory = categoryMap[formState.category] || formState.category.toLowerCase().replace(/\s+/g, "-");
 
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedPackages));
+      // Check if we have files to upload
+      const hasFiles = formState.featureImage || formState.galleryImages.length > 0;
+
+      if (hasFiles) {
+        // Use FormData for file uploads
+        const formData = new FormData();
+        formData.append("title", formState.tourName);
+        formData.append("category", backendCategory);
+        formData.append("destination", formState.destination);
+        formData.append("description", formState.description || "");
+        formData.append("price", priceNumber.toString());
+        formData.append("offerPrice", formState.offerPrice && offerPriceValue > 0 ? offerPriceValue.toString() : "");
+        
+        if (formState.startDate) formData.append("startDate", formState.startDate);
+        if (formState.endDate) formData.append("endDate", formState.endDate);
+        if (formState.durationDays) formData.append("durationDays", formState.durationDays);
+        if (formState.durationNights) formData.append("durationNights", formState.durationNights);
+        if (formState.totalPeople) formData.append("maxParticipants", formState.totalPeople);
+        if (formState.minAge) formData.append("minAge", formState.minAge);
+        
+        // Filter out empty highlights
+        const filteredHighlights = formState.highlights.filter((h) => h.trim().length > 0);
+        formData.append("highlights", JSON.stringify(filteredHighlights));
+        formData.append("activities", JSON.stringify(formState.activities.length ? formState.activities : []));
+        formData.append("includes", JSON.stringify(formState.includes.length ? formState.includes : []));
+        formData.append("excludes", JSON.stringify(formState.excludes.length ? formState.excludes : []));
+        formData.append("itinerary", JSON.stringify(formState.itinerary.length ? formState.itinerary : []));
+        formData.append("faqs", JSON.stringify(formState.faqs.length ? formState.faqs : []));
+        
+        // Add location details
+        if (formState.country) formData.append("country", formState.country);
+        if (formState.city) formData.append("city", formState.city);
+        if (formState.state) formData.append("state", formState.state);
+        if (formState.zipCode) formData.append("zipCode", formState.zipCode);
+        if (formState.address) formData.append("address", formState.address);
+        if (formState.address1) formData.append("address1", formState.address1);
+        
+        // Add files
+        if (formState.featureImage) {
+          formData.append("featureImage", formState.featureImage);
+        }
+        formState.galleryImages.forEach((file) => {
+          formData.append("galleryImages[]", file);
+        });
+
+        await api.updatePackage(packageId, formData);
+      } else {
+        // Use JSON for text-only updates
+        const packageData: Record<string, any> = {
+          title: formState.tourName,
+          category: backendCategory,
+          destination: formState.destination,
+          description: formState.description || "",
+          price: priceNumber,
+        };
+        
+        if (formState.offerPrice && offerPriceValue > 0) {
+          packageData.offerPrice = offerPriceValue;
+        }
+        if (formState.startDate) packageData.startDate = formState.startDate;
+        if (formState.endDate) packageData.endDate = formState.endDate;
+        if (formState.durationDays) packageData.durationDays = parseInt(formState.durationDays, 10);
+        if (formState.durationNights) packageData.durationNights = parseInt(formState.durationNights, 10);
+        if (formState.totalPeople) packageData.maxParticipants = parseInt(formState.totalPeople, 10);
+        if (formState.minAge) packageData.minAge = parseInt(formState.minAge, 10);
+        
+        // Filter out empty highlights
+        const filteredHighlights = formState.highlights.filter((h) => h.trim().length > 0);
+        if (filteredHighlights.length > 0) {
+          packageData.highlights = filteredHighlights;
+        }
+        if (formState.activities.length > 0) packageData.activities = formState.activities;
+        if (formState.includes.length > 0) packageData.included = formState.includes;
+        if (formState.excludes.length > 0) packageData.excluded = formState.excludes;
+        if (formState.itinerary.length > 0) packageData.itinerary = formState.itinerary;
+        if (formState.faqs.length > 0) packageData.faqs = formState.faqs;
+        
+        if (formState.country) packageData.country = formState.country;
+        if (formState.city) packageData.city = formState.city;
+        if (formState.state) packageData.state = formState.state;
+        if (formState.zipCode) packageData.zipCode = formState.zipCode;
+        if (formState.address) packageData.address = formState.address;
+        if (formState.address1) packageData.address1 = formState.address1;
+
+        await api.updatePackage(packageId, packageData);
+      }
 
       // Redirect to packages list
       router.push("/admin/packages?updated=1");
