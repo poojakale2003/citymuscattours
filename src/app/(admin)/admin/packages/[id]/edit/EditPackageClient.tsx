@@ -160,6 +160,8 @@ type EditPackageClientProps = {
   packageId: string;
 };
 
+type PackageApiResponse = Awaited<ReturnType<typeof api.getPackage>>;
+
 export default function EditPackageClient({ packageId }: EditPackageClientProps) {
   const router = useRouter();
   
@@ -234,6 +236,23 @@ export default function EditPackageClient({ packageId }: EditPackageClientProps)
     return [];
   };
 
+const normalizeItinerary = (
+  items: Array<{ day?: string; title?: string; description?: string }>
+): Array<{ day: string; title: string; description: string }> =>
+  items.map((item, index) => ({
+    day: item.day && item.day.trim().length > 0 ? item.day : `Day ${index + 1}`,
+    title: item.title ?? "",
+    description: item.description ?? "",
+  }));
+
+const normalizeFaqs = (
+  items: Array<{ question?: string; answer?: string }>
+): Array<{ question: string; answer: string }> =>
+  items.map((item) => ({
+    question: item.question ?? "",
+    answer: item.answer ?? "",
+  }));
+
   // Load package data from API
   useEffect(() => {
     if (!packageId) return;
@@ -243,7 +262,7 @@ export default function EditPackageClient({ packageId }: EditPackageClientProps)
         setIsLoading(true);
         setError(null);
         
-        const response = await api.getPackage(packageId);
+        const response: PackageApiResponse = await api.getPackage(packageId);
         const pkg = response.data;
         
         if (!pkg) {
@@ -257,8 +276,12 @@ export default function EditPackageClient({ packageId }: EditPackageClientProps)
         const activities = parseJsonField(pkg.activities, []);
         const includes = parseJsonField(pkg.includes, []);
         const excludes = parseJsonField(pkg.excludes, []);
-        const itinerary = parseStructuredField(pkg.itinerary);
-        const faqs = parseStructuredField(pkg.faq);
+        const rawItinerary = parseStructuredField(pkg.itinerary);
+        const itinerary = normalizeItinerary(
+          rawItinerary.length > 0 ? rawItinerary : [{ day: "Day 1", title: "", description: "" }]
+        );
+        const rawFaqs = parseStructuredField(pkg.faq);
+        const faqs = normalizeFaqs(rawFaqs.length > 0 ? rawFaqs : [{ question: "", answer: "" }]);
         const images = parseJsonField(pkg.images, []);
         
         // Format dates (YYYY-MM-DD)
@@ -295,8 +318,8 @@ export default function EditPackageClient({ packageId }: EditPackageClientProps)
           activities: activities.length > 0 ? activities : [],
           includes: includes.length > 0 ? includes : [],
           excludes: excludes.length > 0 ? excludes : [],
-          itinerary: itinerary.length > 0 ? itinerary : [{ day: "Day 1", title: "", description: "" }],
-          faqs: faqs.length > 0 ? faqs : [{ question: "", answer: "" }],
+          itinerary,
+          faqs,
           galleryImages: [], // Gallery images are for new uploads only
           featureImage: null, // Feature image is for new upload only
           description: pkg.description || "",

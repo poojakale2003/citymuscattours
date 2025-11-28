@@ -2,6 +2,12 @@ import { getToken, getRefreshToken, saveToken, saveRefreshToken, clearToken, cle
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost/php-backend/api";
 
+type ApiResponse<T> = {
+  data: T;
+  message?: string;
+  meta?: unknown;
+};
+
 // Token refresh flag to prevent multiple simultaneous refresh calls
 let isRefreshing = false;
 let refreshPromise: Promise<string | null> | null = null;
@@ -733,7 +739,7 @@ export const api = {
     return request<any>(fullUrl);
   },
 
-  getPackage: (id: string) => request(`/packages/${id}`),
+  getPackage: (id: string) => request<ApiResponse<any>>(`/packages/${id}`),
 
   createPackage: async (payload: FormData | Record<string, any>) => {
     // If payload is FormData, send as multipart/form-data
