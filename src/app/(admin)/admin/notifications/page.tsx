@@ -14,6 +14,16 @@ type Notification = {
   priority: "high" | "medium" | "low";
 };
 
+// Helper function to parse a value to a number
+const toNumber = (value: unknown): number => {
+  if (typeof value === "number") return value;
+  if (typeof value === "string") {
+    const parsed = parseFloat(value);
+    return isNaN(parsed) ? 0 : parsed;
+  }
+  return 0;
+};
+
 // Helper function to format relative time
 const formatRelativeTime = (date: Date): string => {
   const now = new Date();
@@ -84,8 +94,9 @@ export default function NotificationsPage() {
           
           if (booking.payment_status === "paid") {
             title = "Payment Received";
+            const totalAmount = toNumber(booking.total_amount);
             message = `Payment of ${
-              booking.total_amount ? formatDisplayCurrency(booking.total_amount, booking.currency ?? "INR") : "amount"
+              totalAmount > 0 ? formatDisplayCurrency(totalAmount, booking.currency ?? "INR") : "amount"
             } received for booking #BK-${String(booking.id).padStart(4, "0")}`;
             priority = "high";
           } else if (booking.status?.toLowerCase() === "cancelled") {

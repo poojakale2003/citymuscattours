@@ -491,17 +491,21 @@ export default function AdminDashboardPage() {
         {(loading ? summaryCards : summaryCards).map((card) => (
           <div
             key={card.label}
-            className={`rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_25px_70px_-45px_rgb(15_23_42/0.6)] ${card.accent ?? ""}`}
+            className={`rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_25px_70px_-45px_rgb(15_23_42/0.6)] min-w-0 ${card.accent ?? ""}`}
           >
-            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">{card.label}</p>
-            <p className="mt-4 text-3xl font-semibold text-slate-900">
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500 truncate">{card.label}</p>
+            <p className="mt-4 text-3xl font-semibold text-slate-900 truncate" title={card.value}>
               {loading ? (
                 <span className="h-6 w-20 animate-pulse rounded bg-slate-100" />
               ) : (
                 card.value
               )}
             </p>
-            {card.delta ? <p className="mt-2 text-xs text-(--color-brand-600)">{card.delta}</p> : null}
+            {card.delta ? (
+              <p className="mt-2 text-xs text-(--color-brand-600) truncate" title={card.delta}>
+                {card.delta}
+              </p>
+            ) : null}
           </div>
         ))}
       </section>
@@ -514,7 +518,7 @@ export default function AdminDashboardPage() {
               Updated · {new Date().toLocaleDateString()}
             </span>
           </div>
-          <div className="mt-4 flex flex-col gap-4 sm:mt-6 sm:gap-6 md:mt-8 md:gap-8 lg:flex-row lg:items-center lg:justify-between">
+          <div className="mt-4 flex flex-col gap-4 px-4 py-4 sm:mt-6 sm:gap-6 sm:px-6 sm:py-6 md:mt-8 md:gap-8 md:px-8 md:py-8 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex w-full justify-center lg:w-auto lg:flex-shrink-0">
               <div className="relative flex h-32 w-32 items-center justify-center sm:h-40 sm:w-40 md:h-48 md:w-48 lg:h-56 lg:w-56">
                 <div className="h-full w-full rounded-full" style={donutStyle}>

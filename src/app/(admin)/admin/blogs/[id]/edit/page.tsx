@@ -4,6 +4,27 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { api } from "@/lib/api";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost/php-backend/api";
+const UPLOAD_BASE_URL = API_BASE_URL.replace(/\/api\/?$/, "");
+
+// Helper function to build full image URL from relative path
+const buildBlogImageUrl = (path: string | null | undefined): string => {
+  if (!path) {
+    return "";
+  }
+  // If already a full URL, return as is
+  if (path.startsWith("http://") || path.startsWith("https://")) {
+    return path;
+  }
+  // If relative path starting with /uploads/, prepend base URL
+  if (path.startsWith("/uploads/")) {
+    return `${UPLOAD_BASE_URL}/public${path}`;
+  }
+  // If path doesn't start with /, add it
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  return `${UPLOAD_BASE_URL}/public${normalizedPath}`;
+};
+
 type BlogFormState = {
   title: string;
   content: string;
@@ -33,33 +54,65 @@ export default function AdminEditBlogPage() {
   });
 
   useEffect(() => {
-    if (blogId) {
-      loadBlog();
-    }
-  }, [blogId]);
-
-  const loadBlog = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const blog = await api.getBlog(blogId);
-      
-      setFormState({
-        title: blog.title || "",
-        content: blog.content || "",
-        excerpt: blog.excerpt || "",
-        category: blog.category || "",
-        author: blog.author || "",
-        is_published: blog.is_published || false,
-      });
-      setExistingImage(blog.image || null);
-    } catch (err: any) {
-      console.error("Error loading blog:", err);
-      setError(err.message || "Failed to load blog post");
-    } finally {
+    if (!blogId) {
       setLoading(false);
+      return;
     }
-  };
+    
+    let isMounted = true;
+    
+    const loadBlog = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await api.getBlog(blogId);
+        
+        if (!isMounted) return;
+        
+        // Handle response that might be wrapped in 'data' property
+        const blog = (response as any).data || response;
+        
+        console.log("Blog data loaded:", blog); // Debug log
+        
+        // Handle is_published - could be boolean or number (0/1)
+        const isPublished = typeof blog.is_published === 'boolean' 
+          ? blog.is_published 
+          : blog.is_published === 1 || blog.is_published === '1' || String(blog.is_published) === '1';
+        
+        const newFormState = {
+          title: String(blog.title ?? ""),
+          content: String(blog.content ?? ""),
+          excerpt: String(blog.excerpt ?? ""),
+          category: String(blog.category ?? ""),
+          author: String(blog.author ?? ""),
+          is_published: isPublished,
+        };
+        
+        console.log("Setting form state:", newFormState); // Debug log
+        
+        if (isMounted) {
+          setFormState(newFormState);
+          // Handle image URL - use the same helper function as other blog pages
+          setExistingImage(blog.image ? buildBlogImageUrl(blog.image) : null);
+        }
+      } catch (err: any) {
+        console.error("Error loading blog:", err);
+        if (isMounted) {
+          setError(err.message || "Failed to load blog post");
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+    
+    loadBlog();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [blogId]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
