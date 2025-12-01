@@ -660,7 +660,7 @@ const normalizeFaqs = (
                 onChange={handleChange("category")}
                 className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm focus:border-(--color-brand-400) focus:outline-none focus:ring-2 focus:ring-(--color-brand-200)"
               >
-                {categories.map((category) => (
+                {categories.slice(0, 3).map((category) => (
                   <option key={category} value={category}>
                     {category}
                   </option>
