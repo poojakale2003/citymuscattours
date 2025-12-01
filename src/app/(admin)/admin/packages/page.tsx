@@ -62,9 +62,34 @@ export default function AdminPackagesPage() {
     try {
       setLoading(true);
       setError(null);
-      // Explicitly request non-archived packages (archived: false)
-      const response = await api.getPackages({ archived: false });
-      const normalizedPackages = (response.data || []).map((pkg: any) => {
+      // Fetch all packages by paginating through all pages
+      let allPackages: any[] = [];
+      let currentPage = 1;
+      const pageSize = 100; // Fetch 100 packages per page
+      let hasMore = true;
+
+      while (hasMore) {
+        const response = await api.getPackages({ 
+          archived: false, 
+          page: currentPage, 
+          limit: pageSize 
+        });
+        
+        const pagePackages = response.data || [];
+        if (pagePackages.length === 0) {
+          hasMore = false;
+        } else {
+          allPackages = [...allPackages, ...pagePackages];
+          // If we got fewer packages than the page size, we've reached the end
+          if (pagePackages.length < pageSize) {
+            hasMore = false;
+          } else {
+            currentPage++;
+          }
+        }
+      }
+
+      const normalizedPackages = allPackages.map((pkg: any) => {
         // Ensure prices are properly parsed as numbers
         const price = typeof pkg.price === 'string' ? parseFloat(pkg.price) : (typeof pkg.price === 'number' ? pkg.price : 0);
         const offerPrice = pkg.offer_price 
@@ -159,10 +184,23 @@ export default function AdminPackagesPage() {
     }
   }, [totalPages, currentPage]);
 
+  // Scroll to top when page changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [currentPage]);
+
   const paginatedPackages = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
     return filteredPackages.slice(start, start + ITEMS_PER_PAGE);
   }, [filteredPackages, currentPage]);
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
 
   // Format price for admin display - show exact price from database in OMR
   const formatPrice = (price: number, offerPrice?: number) => {
@@ -255,23 +293,59 @@ export default function AdminPackagesPage() {
         </div>
       </section>
 
-      {filteredPackages.length > ITEMS_PER_PAGE && (
+      {totalPages > 1 && (
         <div className="flex flex-col items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 shadow-sm sm:flex-row">
           <span>
-            Page {currentPage} of {totalPages}
+            Page {currentPage} of {totalPages} ({filteredPackages.length} total package{filteredPackages.length === 1 ? "" : "s"})
           </span>
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+              onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
               className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Previous
             </button>
+            
+            {/* Page number buttons */}
+            <div className="flex items-center gap-1">
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let pageNum: number;
+                if (totalPages <= 5) {
+                  // Show all pages if 5 or fewer
+                  pageNum = i + 1;
+                } else if (currentPage <= 3) {
+                  // Show first 5 pages
+                  pageNum = i + 1;
+                } else if (currentPage >= totalPages - 2) {
+                  // Show last 5 pages
+                  pageNum = totalPages - 4 + i;
+                } else {
+                  // Show pages around current page
+                  pageNum = currentPage - 2 + i;
+                }
+                
+                return (
+                  <button
+                    key={pageNum}
+                    type="button"
+                    onClick={() => handlePageChange(pageNum)}
+                    className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${
+                      currentPage === pageNum
+                        ? "border-[var(--color-brand-600)] bg-[var(--color-brand-600)] text-white"
+                        : "border-slate-200 text-slate-600 hover:border-slate-300 hover:text-slate-900"
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+            </div>
+            
             <button
               type="button"
-              onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+              onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
               className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
             >

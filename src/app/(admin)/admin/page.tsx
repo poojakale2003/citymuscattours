@@ -216,7 +216,32 @@ export default function AdminDashboardPage() {
     }));
   }, [normalizedPackages]);
 
-  const totalRevenue = normalizedPackages.reduce((acc, pkg) => acc + pkg.priceValue, 0);
+  // Calculate earnings from confirmed/paid bookings only (not published package amounts)
+  const totalEarningsFromBookings = useMemo(() => {
+    return bookings
+      .filter((booking) => {
+        // Only count explicitly paid/confirmed bookings
+        const paymentStatus = (booking.payment_status || "").toLowerCase();
+        const status = (booking.status || "").toLowerCase();
+        // Must have payment_status = "paid" OR status = "confirmed"/"paid"
+        // AND must have a valid total_amount
+        const isPaid = paymentStatus === "paid" || status === "confirmed" || status === "paid";
+        const hasAmount = booking.total_amount && booking.total_amount > 0;
+        return isPaid && hasAmount;
+      })
+      .reduce((acc, booking) => {
+        const amount = booking.total_amount || 0;
+        return acc + amount;
+      }, 0);
+  }, [bookings]);
+
+  const totalRevenue = totalEarningsFromBookings; // Use bookings-based earnings
+  
+  // Calculate total inventory value (sum of all package prices)
+  const totalInventoryValue = useMemo(() => {
+    return normalizedPackages.reduce((acc, pkg) => acc + pkg.priceValue, 0);
+  }, [normalizedPackages]);
+  
   const featuredCount = normalizedPackages.filter((pkg) => pkg.isFeatured).length;
   const uniqueDestinations = new Set(
     normalizedPackages.map((pkg) => pkg.destination).filter(Boolean) as string[]
@@ -244,12 +269,12 @@ export default function AdminDashboardPage() {
       },
       {
         label: "Total Inventory Value",
-        value: formatCurrency(totalRevenue),
+        value: formatCurrency(totalInventoryValue),
         delta: `${normalizedPackages.length ? "Live valuation" : "No inventory yet"}`,
-        accent: "bg-gradient-to-r from-emerald-500/20 to-emerald-500/10",
+        accent: "bg-gradient-to-r from-amber-500/20 to-amber-500/10",
       },
     ];
-  }, [normalizedPackages.length, featuredCount, uniqueDestinations, totalRevenue]);
+  }, [normalizedPackages.length, featuredCount, uniqueDestinations, totalInventoryValue]);
 
   const bookingSegments = useMemo(() => {
     if (!categoryStats.length) {
@@ -287,6 +312,8 @@ export default function AdminDashboardPage() {
     }
 
     const monthRevenue = new Map<string, number>();
+    
+    // Calculate inventory value from packages by month (same as Total Inventory Value)
     normalizedPackages.forEach((pkg) => {
       const date = pkg.createdAtDate ?? new Date();
       const key = `${date.getFullYear()}-${date.getMonth() + 1}`;
@@ -305,7 +332,7 @@ export default function AdminDashboardPage() {
   }, [normalizedPackages]);
 
   const maxTarget = Math.max(...earningsTrend.map((item) => item.target), 1);
-  const totalEarningsLabel = formatCurrency(totalRevenue);
+  const totalEarningsLabel = formatCurrency(totalInventoryValue);
 
   const recentlyAdded = useMemo(() => {
     const sorted = [...normalizedPackages]
@@ -559,7 +586,7 @@ export default function AdminDashboardPage() {
           <div className="flex flex-col gap-2 sm:gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0 flex-1">
               <h2 className="text-sm font-semibold text-slate-900 sm:text-base md:text-lg lg:text-xl">Earnings</h2>
-              <p className="mt-0.5 text-[10px] text-slate-500 sm:mt-1 sm:text-xs md:text-sm">Based on published package pricing</p>
+              <p className="mt-0.5 text-[10px] text-slate-500 sm:mt-1 sm:text-xs md:text-sm">Based on booked package pricing</p>
               <p className="mt-1.5 text-xl font-semibold text-slate-900 sm:mt-2 sm:text-2xl md:mt-3 md:text-3xl lg:mt-4 lg:text-4xl">{loading ? "…" : totalEarningsLabel}</p>
             </div>
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 sm:flex-col sm:items-end sm:flex-shrink-0">
