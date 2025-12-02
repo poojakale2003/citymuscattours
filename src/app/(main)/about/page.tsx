@@ -7,7 +7,7 @@ export default function AboutPage() {
         </p>
         <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">About Us</h1>
         <p className="mx-auto max-w-3xl text-sm text-slate-600 sm:text-base">
-          We are a concierge-led travel studio based in Muscat crafting effortless city tours, premium car rentals, and
+          We are a concierge-led travel studio based in Muscat crafting effortless tour packages, premium car rentals, and
           seamless airport transfers for discerning explorers across the Gulf.
         </p>
       </header>

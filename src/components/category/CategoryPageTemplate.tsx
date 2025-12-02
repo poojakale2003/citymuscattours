@@ -454,7 +454,7 @@ export default function CategoryPageTemplate({ packages = [], children, compact 
               </button>
             ) : null}
 
-            <div className="overflow-hidden px-8 sm:px-6 md:px-8">
+            <div className="overflow-hidden px-6 sm:px-8 md:px-10">
               <div
                 ref={scrollContainerRef}
                 className="custom-scrollbar-hidden flex gap-2 overflow-x-auto scroll-smooth py-1 sm:gap-3"

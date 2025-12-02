@@ -1,9 +1,9 @@
 const offers = [
   {
-    title: "City Tours",
+    title: "Tour Packages",
     badge: "Curated Itineraries",
     details: "Private guides · Cultural immersion · Hidden gems",
-    cta: "Explore City Tours →",
+    cta: "Explore Tour Packages →",
     image: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=600&h=400&fit=crop",
   },
   {
@@ -20,12 +20,19 @@ const offers = [
     cta: "Book Airport Transfer →",
     image: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=600&h=400&fit=crop",
   },
+  {
+    title: "Hotel Booking",
+    badge: "Premium Accommodations",
+    details: "Exclusive rates · Concierge services · Flexible cancellation",
+    cta: "Book a Hotel →",
+    image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&h=400&fit=crop",
+  },
 ];
 
 export default function HeroOffers() {
   return (
     <section className="section -mt-20">
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {offers.map((offer) => (
           <article
             key={offer.title}

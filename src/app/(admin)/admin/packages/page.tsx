@@ -202,6 +202,18 @@ export default function AdminPackagesPage() {
     }
   };
 
+  // Map category slugs to display names
+  const getCategoryDisplayName = (category: string | null | undefined): string => {
+    if (!category) return "N/A";
+    const categoryMap: Record<string, string> = {
+      "city-tours": "Tour Packages",
+      "car-rental": "Car Rental",
+      "airport-transport": "Airport Transport",
+      "hotel-booking": "Hotel Booking",
+    };
+    return categoryMap[category.toLowerCase()] || category;
+  };
+
   // Format price for admin display - show exact price from database in OMR
   const formatPrice = (price: number, offerPrice?: number) => {
     const displayPrice = offerPrice && offerPrice > 0 ? offerPrice : price;
@@ -278,16 +290,16 @@ export default function AdminPackagesPage() {
                 setCategoryFilter(event.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-(--color-brand-400) focus:outline-none focus:ring-2 focus:ring-(--color-brand-200) sm:w-64"
+              className="w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-900 shadow-sm focus:border-(--color-brand-400) focus:outline-none focus:ring-2 focus:ring-(--color-brand-200) sm:w-auto sm:min-w-[200px]"
             >
               {categoryOptions.map((option) => (
                 <option key={option} value={option}>
-                  {option === "all" ? "All categories" : option}
+                  {option === "all" ? "All categories" : getCategoryDisplayName(option)}
                 </option>
               ))}
             </select>
           </div>
-          <div className="text-xs text-slate-500">
+          <div className="text-xs text-slate-500 hidden sm:block">
             Showing {filteredPackages.length} result{filteredPackages.length === 1 ? "" : "s"}
           </div>
         </div>
@@ -355,30 +367,30 @@ export default function AdminPackagesPage() {
         </div>
       )}
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_25px_70px_-45px_rgb(15_23_42/0.6)]">
+      <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_25px_70px_-45px_rgb(15_23_42/0.6)] sm:p-6">
         {loading ? (
           <div className="py-12 text-center text-sm text-slate-600">Loading packages...</div>
         ) : filteredPackages.length === 0 ? (
           <div className="py-12 text-center text-sm text-slate-600">No packages found. Create your first package to get started.</div>
         ) : (
-          <div className="overflow-x-auto">
-            <div className="min-w-[720px] overflow-hidden rounded-2xl border border-slate-200">
+          <div className="overflow-x-auto -mx-4 sm:mx-0 sm:rounded-2xl" style={{ scrollBehavior: 'smooth', WebkitOverflowScrolling: 'touch' }}>
+            <div className="min-w-[640px] rounded-2xl border border-slate-200 sm:min-w-full">
           <table className="min-w-full divide-y divide-slate-200 text-sm">
             <thead className="bg-slate-50/80">
               <tr>
-                <th className="px-6 py-3 text-left font-semibold text-slate-600">
+                <th className="px-3 py-3 text-left text-xs font-semibold text-slate-600 sm:px-6">
                   Package
                 </th>
-                <th className="px-6 py-3 text-left font-semibold text-slate-600">
+                <th className="px-3 py-3 text-left text-xs font-semibold text-slate-600 sm:px-6 hidden md:table-cell">
                   Category
                 </th>
-                <th className="px-6 py-3 text-left font-semibold text-slate-600">
+                <th className="px-3 py-3 text-left text-xs font-semibold text-slate-600 sm:px-6">
                   Price
                 </th>
-                <th className="px-6 py-3 text-left font-semibold text-slate-600">
+                <th className="px-3 py-3 text-left text-xs font-semibold text-slate-600 sm:px-6 hidden sm:table-cell">
                   Status
                 </th>
-                <th className="px-6 py-3 text-right font-semibold text-slate-600">
+                <th className="px-3 py-3 text-right text-xs font-semibold text-slate-600 sm:px-6">
                   Actions
                 </th>
               </tr>
@@ -386,16 +398,21 @@ export default function AdminPackagesPage() {
             <tbody className="divide-y divide-slate-200 bg-white">
                 {paginatedPackages.map((travelPackage) => (
                 <tr key={travelPackage.id} className="hover:bg-slate-50/60">
-                  <td className="px-6 py-4 font-medium text-slate-900">
-                    {travelPackage.name}
+                  <td className="px-3 py-4 font-medium text-slate-900 sm:px-6">
+                    <div className="max-w-[200px] truncate sm:max-w-none" title={travelPackage.name}>
+                      {travelPackage.name}
+                    </div>
+                    <div className="mt-1 text-xs text-slate-500 md:hidden">
+                      {getCategoryDisplayName(travelPackage.category)}
+                    </div>
                   </td>
-                  <td className="px-6 py-4 text-slate-600">
-                      {travelPackage.category || "N/A"}
+                  <td className="px-3 py-4 text-slate-600 sm:px-6 hidden md:table-cell">
+                      {getCategoryDisplayName(travelPackage.category)}
                   </td>
-                  <td className="px-6 py-4 text-slate-600">
+                  <td className="px-3 py-4 text-slate-600 sm:px-6">
                       {formatPrice(travelPackage.price, travelPackage.offer_price)}
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-3 py-4 sm:px-6 hidden sm:table-cell">
                     <span
                         className={`rounded-full px-3 py-1 text-xs font-semibold ${
                           travelPackage.is_featured
@@ -406,8 +423,8 @@ export default function AdminPackagesPage() {
                         {travelPackage.is_featured ? "Featured" : "Active"}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-right">
-                      <div className="flex flex-col gap-2 sm:inline-flex sm:flex-row">
+                  <td className="px-3 py-4 text-right sm:px-6">
+                      <div className="flex flex-col gap-2 sm:inline-flex sm:flex-row sm:justify-end">
                       <button
                         type="button"
                         onClick={() => handleEdit(travelPackage.id)}

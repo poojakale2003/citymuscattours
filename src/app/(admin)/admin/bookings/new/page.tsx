@@ -119,15 +119,15 @@ export default function AdminCreateBookingPage() {
 
   return (
     <div className="space-y-10">
-      <header className="flex items-center justify-between">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-semibold text-slate-900">Create New Booking</h1>
+          <h1 className="text-2xl font-semibold text-slate-900 sm:text-3xl">Create New Booking</h1>
           <p className="mt-1 text-sm text-slate-600">Add a new booking manually</p>
         </div>
         <button
           type="button"
           onClick={() => router.back()}
-          className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+          className="inline-flex items-center justify-center rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900 sm:w-auto"
         >
           Cancel
         </button>
@@ -140,7 +140,7 @@ export default function AdminCreateBookingPage() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_25px_70px_-45px_rgb(15_23_42/0.6)]">
+      <form onSubmit={handleSubmit} className="rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_25px_70px_-45px_rgb(15_23_42/0.6)] sm:p-6">
         <div className="space-y-6">
           <div>
             <label className="block text-sm font-semibold text-slate-800">

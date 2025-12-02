@@ -6,7 +6,7 @@ import Link from "next/link";
 const tabs = [
   {
     id: "city-tours",
-    label: "City Tours",
+    label: "Tour Packages",
     href: "/city-tours",
     icon: (
       <svg
@@ -77,6 +77,28 @@ const tabs = [
       </svg>
     ),
   },
+  {
+    id: "hotel-booking",
+    label: "Hotel Booking",
+    href: "/hotel-booking",
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={2}
+        className="h-5 w-5"
+      >
+        <path
+          d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path d="M9 22V12h6v10" strokeLinecap="round" />
+      </svg>
+    ),
+  },
 ];
 
 export default function HeroSection() {
@@ -107,7 +129,7 @@ export default function HeroSection() {
               </span>
             </h1>
             <p className="mx-auto max-w-2xl text-sm leading-relaxed text-white/90 sm:text-base md:text-lg lg:text-xl">
-              Discover curated city tours, premium car rentals, and seamless airport transfers. 
+              Discover curated tour packages, premium car rentals, and seamless airport transfers. 
               Your journey to unforgettable experiences starts here.
             </p>
           </div>

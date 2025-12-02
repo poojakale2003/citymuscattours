@@ -14,13 +14,10 @@ type PackageFormState = {
   category: string;
   startDate: string;
   endDate: string;
-  destination: string;
   durationDays: string;
   durationNights: string;
-  totalPeople: string;
   pricing: string;
   offerPrice: string;
-  minAge: string;
   rating: string;
   isFeatured: boolean;
   
@@ -52,7 +49,7 @@ type PackageFormState = {
   description: string;
 };
 
-const categories = ["City Tours", "Car Rental", "Airport Transport"];
+const categories = ["Tour Packages", "Car Rental", "Airport Transport", "Hotel Booking"];
 
 const activityOptions = [
   "Cultural Experiences",
@@ -131,7 +128,6 @@ const omanGovernorates = [
 const fieldNameMap: Record<string, string> = {
   title: "tourName",
   tourName: "tourName",
-  destination: "destination",
   price: "pricing",
   pricing: "pricing",
   duration: "durationDays",
@@ -168,13 +164,10 @@ export default function AdminCreatePackagePage() {
     category: categories[0],
     startDate: "",
     endDate: "",
-    destination: "",
     durationDays: "",
     durationNights: "",
-    totalPeople: "",
     pricing: "",
     offerPrice: "",
-    minAge: "",
     rating: "",
     isFeatured: false,
     country: "Oman",
@@ -316,11 +309,6 @@ export default function AdminCreatePackagePage() {
         setIsSubmitting(false);
         return;
       }
-      if (!formState.destination.trim()) {
-        setFieldErrors({ destination: ["Destination is required"] });
-        setIsSubmitting(false);
-        return;
-      }
       if (!formState.pricing || parseInt(formState.pricing, 10) <= 0) {
         setFieldErrors({ pricing: ["Valid pricing is required"] });
         setIsSubmitting(false);
@@ -346,17 +334,17 @@ export default function AdminCreatePackagePage() {
         
         // Add text fields - always include required fields
         formData.append("title", formState.tourName.trim());
-        // Map category to backend format (e.g., "City Tours" -> "city-tours")
+        // Map category to backend format (e.g., "Tour Packages" -> "city-tours")
         const categoryMap: Record<string, string> = {
-          "City Tours": "city-tours",
+          "Tour Packages": "city-tours",
           "Car Rental": "car-rental",
           "Airport Transport": "airport-transport",
+          "Hotel Booking": "hotel-booking",
           "Cruises & Stays": "cruises-stays",
           "Experiences": "experiences",
         };
         const backendCategory = categoryMap[formState.category] || formState.category.toLowerCase().replace(/\s+/g, "-");
         formData.append("category", backendCategory);
-        formData.append("destination", formState.destination.trim());
         formData.append("description", (formState.description || "").trim());
         formData.append("price", priceNumber.toString());
         formData.append("currency", displayCurrencyCode);
@@ -375,22 +363,16 @@ export default function AdminCreatePackagePage() {
         if (formState.durationNights) {
           formData.append("durationNights", formState.durationNights);
         }
-        if (formState.minAge) {
-          formData.append("minAge", formState.minAge);
-        }
         if (formState.rating) {
           formData.append("rating", formState.rating);
         }
         formData.append("isFeatured", formState.isFeatured ? "true" : "false");
-        if (formState.totalPeople) {
-          formData.append("maxParticipants", formState.totalPeople);
-        }
         // Ensure duration is always sent
         const durationValue = formState.durationDays 
           ? `${formState.durationDays} day${parseInt(formState.durationDays) !== 1 ? "s" : ""}${formState.durationNights ? ` ${formState.durationNights} night${parseInt(formState.durationNights) !== 1 ? "s" : ""}` : ""}`
           : "";
         formData.append("duration", durationValue);
-        formData.append("location", (formState.city || formState.destination).trim());
+        formData.append("location", formState.city.trim());
         
         // Add arrays as JSON strings (filter out empty strings to avoid [""])
         // Clean highlights: remove null, undefined, and empty/whitespace-only strings
@@ -435,8 +417,6 @@ export default function AdminCreatePackagePage() {
         if (formState.zipCode) formData.append("zipCode", formState.zipCode);
         if (formState.address) formData.append("address", formState.address);
         if (formState.address1) formData.append("address1", formState.address1);
-        if (formState.totalPeople) formData.append("maxParticipants", formState.totalPeople);
-        if (formState.minAge) formData.append("minAge", formState.minAge);
 
         // Add files
         if (formState.featureImage) {
@@ -451,7 +431,7 @@ export default function AdminCreatePackagePage() {
         console.log("Sending FormData with fields:", {
           title: formState.tourName,
           category: backendCategory,
-          destination: formState.destination,
+          location: formState.city,
           price: priceNumber,
           duration: `${formState.durationDays} days${formState.durationNights ? ` ${formState.durationNights} nights` : ""}`,
           hasFeatureImage: !!formState.featureImage,
@@ -479,9 +459,10 @@ export default function AdminCreatePackagePage() {
         // Use JSON for text-only submissions
         // Map category to backend format
         const categoryMap: Record<string, string> = {
-          "City Tours": "city-tours",
+          "Tour Packages": "city-tours",
           "Car Rental": "car-rental",
           "Airport Transport": "airport-transport",
+          "Hotel Booking": "hotel-booking",
           "Cruises & Stays": "cruises-stays",
           "Experiences": "experiences",
         };
@@ -490,7 +471,6 @@ export default function AdminCreatePackagePage() {
         const packageData = {
           title: formState.tourName,
           category: backendCategory,
-          destination: formState.destination,
           description: formState.description || "",
           price: priceNumber,
           currency: displayCurrencyCode,
@@ -500,7 +480,7 @@ export default function AdminCreatePackagePage() {
           durationNights: formState.durationNights ? parseInt(formState.durationNights, 10) : undefined,
           startDate: formState.startDate || undefined,
           endDate: formState.endDate || undefined,
-          location: formState.city || formState.destination,
+          location: formState.city || undefined,
           highlights: formState.highlights.filter(h => h.trim().length > 0).length > 0 
             ? formState.highlights.filter(h => h.trim().length > 0) 
             : undefined,
@@ -517,8 +497,6 @@ export default function AdminCreatePackagePage() {
           zipCode: formState.zipCode || undefined,
           address: formState.address || undefined,
           address1: formState.address1 || undefined,
-          maxParticipants: formState.totalPeople ? parseInt(formState.totalPeople, 10) : undefined,
-          minAge: formState.minAge ? parseInt(formState.minAge, 10) : undefined,
           rating: formState.rating ? parseFloat(formState.rating) : undefined,
           isFeatured: formState.isFeatured,
           feature_image: formState.featureImage?.name,
@@ -799,13 +777,12 @@ export default function AdminCreatePackagePage() {
 
             <div className="space-y-2">
               <label htmlFor="startDate" className="text-sm font-semibold text-slate-900">
-                Start Date *
+                Start Date
               </label>
               <input
                 id="startDate"
                 name="startDate"
                 type="date"
-                required
                 min={getTodayDate()}
                 value={formState.startDate}
                 onChange={handleChange("startDate")}
@@ -815,41 +792,17 @@ export default function AdminCreatePackagePage() {
 
             <div className="space-y-2">
               <label htmlFor="endDate" className="text-sm font-semibold text-slate-900">
-                End Date *
+                End Date
               </label>
               <input
                 id="endDate"
                 name="endDate"
                 type="date"
-                required
                 min={formState.startDate || getTodayDate()}
                 value={formState.endDate}
                 onChange={handleChange("endDate")}
                 className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 shadow-sm focus:border-(--color-brand-400) focus:outline-none focus:ring-2 focus:ring-(--color-brand-200)"
               />
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="destination" className="text-sm font-semibold text-slate-900">
-                Destination *
-              </label>
-              <input
-                id="destination"
-                name="destination"
-                type="text"
-                required
-                value={formState.destination}
-                onChange={handleChange("destination")}
-                className={`w-full rounded-xl border px-4 py-3 text-sm text-slate-900 shadow-sm focus:outline-none focus:ring-2 ${
-                  fieldErrors.destination
-                    ? "border-red-300 focus:border-red-400 focus:ring-red-100"
-                    : "border-slate-200 focus:border-(--color-brand-400) focus:ring-(--color-brand-200)"
-                }`}
-                placeholder="Enter destination"
-              />
-              {fieldErrors.destination && (
-                <p className="text-xs text-red-600">{fieldErrors.destination.join(", ")}</p>
-              )}
             </div>
 
             <div className="space-y-2">
@@ -894,23 +847,6 @@ export default function AdminCreatePackagePage() {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="totalPeople" className="text-sm font-semibold text-slate-900">
-                Total Number Of Peoples Allotted *
-              </label>
-              <input
-                id="totalPeople"
-                name="totalPeople"
-                type="number"
-                required
-                min="1"
-                value={formState.totalPeople}
-                onChange={handleChange("totalPeople")}
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 shadow-sm focus:border-(--color-brand-400) focus:outline-none focus:ring-2 focus:ring-(--color-brand-200)"
-                placeholder="0"
-              />
-            </div>
-
-            <div className="space-y-2">
               <label htmlFor="pricing" className="text-sm font-semibold text-slate-900">
                 Pricing ({displayCurrencyCode}) *
               </label>
@@ -945,22 +881,6 @@ export default function AdminCreatePackagePage() {
                 min="0"
                 value={formState.offerPrice}
                 onChange={handleChange("offerPrice")}
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 shadow-sm focus:border-(--color-brand-400) focus:outline-none focus:ring-2 focus:ring-(--color-brand-200)"
-                placeholder="0"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="minAge" className="text-sm font-semibold text-slate-900">
-                Min Age
-              </label>
-              <input
-                id="minAge"
-                name="minAge"
-                type="number"
-                min="0"
-                value={formState.minAge}
-                onChange={handleChange("minAge")}
                 className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 shadow-sm focus:border-(--color-brand-400) focus:outline-none focus:ring-2 focus:ring-(--color-brand-200)"
                 placeholder="0"
               />

@@ -9,6 +9,7 @@ const staticRoutes = [
   "/city-tours",
   "/car-rental",
   "/airport-transport",
+  "/hotel-booking",
   "/packages",
   "/blog",
   "/about",

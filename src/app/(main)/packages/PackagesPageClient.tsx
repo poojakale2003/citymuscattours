@@ -103,7 +103,7 @@ export default function PackagesPageClient() {
             <SearchBar onSearch={handleSearch} />
 
             <div className="grid gap-3 text-xs text-slate-600 sm:gap-4 sm:text-sm sm:grid-cols-2 md:grid-cols-3">
-              {["City Tours", "Car Rental", "Airport Transport"].map((category) => (
+              {["Tour Packages", "Car Rental", "Airport Transport", "Hotel Booking"].map((category) => (
                 <div
                   key={category}
                   className="rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-[0_25px_60px_-35px_rgb(15_23_42/0.6)] sm:rounded-2xl sm:px-5 sm:py-4"

@@ -9,7 +9,7 @@ import {
   FaDribbble,
 } from "react-icons/fa";
 
-const navigationLinks = ["City Tours", "Car Rental", "Airport Transport", "Packages", "Wishlist", "Book Now"];
+const navigationLinks = ["Tour Packages", "Car Rental", "Airport Transport", "Hotel Booking", "Packages", "Wishlist", "Book Now"];
 
 const resourcesLinks = [
   "Travel Guides",
@@ -34,15 +34,15 @@ export default function Footer() {
   return (
     <footer className="bg-[#0b1d3a] text-white">
       <div className="mx-auto max-w-7xl px-4 py-10 md:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-[1.1fr_repeat(3,1fr)_1.1fr]">
-          <div className="space-y-5">
+        <div className="grid grid-cols-1 gap-8 sm:gap-10 md:grid-cols-2 lg:grid-cols-[1.1fr_repeat(3,1fr)_1.1fr]">
+          <div className="space-y-5 sm:space-y-6">
             <div className="flex items-center gap-3">
               <Logo />
             </div>
-            <p className="text-sm text-white/75">
-              Discover curated city tours, premium car rentals, and seamless airport transfers. Your journey to unforgettable experiences starts here.
+            <p className="text-sm leading-relaxed text-white/75 sm:text-base">
+              Discover curated tour packages, premium car rentals, and seamless airport transfers. Your journey to unforgettable experiences starts here.
             </p>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
               {[
                 { Icon: FaFacebookF, href: "https://www.facebook.com/citymuscattours" },
                 { Icon: FaLinkedinIn, href: "https://www.linkedin.com/company/citymuscattours" },
@@ -107,9 +107,9 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col gap-4 border-t border-white/15 pt-6 text-sm text-white/60 md:flex-row md:items-center md:justify-between">
-          <p className="md:order-1">© {new Date().getFullYear()} citymuscattours. All rights reserved.</p>
-          <div className="flex flex-wrap items-center gap-6 md:order-2 md:justify-end">
+        <div className="mt-12 flex flex-col gap-4 border-t border-white/15 pt-6 text-xs text-white/60 sm:text-sm md:flex-row md:items-center md:justify-between">
+          <p className="text-center md:order-1 md:text-left">© {new Date().getFullYear()} citymuscattours. All rights reserved.</p>
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 md:order-2 md:justify-end">
             <Link href="/terms" className="transition hover:text-white">
               Terms of Service
             </Link>
@@ -127,9 +127,10 @@ export default function Footer() {
 }
 
 const linkMap: Record<string, string> = {
-  "City Tours": "/city-tours",
+  "Tour Packages": "/city-tours",
   "Car Rental": "/car-rental",
   "Airport Transport": "/airport-transport",
+  "Hotel Booking": "/hotel-booking",
   Packages: "/packages",
   Wishlist: "/wishlist",
   "Book Now": "/booking",

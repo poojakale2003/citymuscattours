@@ -975,35 +975,62 @@ export const api = {
             
             // Log the full error response for debugging
             console.error("Backend validation error response:", errorData);
+            console.error("Response status:", response.status, response.statusText);
             
-            // Handle validation errors with field details
-            if (errorData.errors && Array.isArray(errorData.errors)) {
-              // Format: [{ field: "title", message: "Title is required" }]
-              validationErrors = {};
-              errorData.errors.forEach((err: { field?: string; message?: string; path?: string }) => {
-                const field = err.field || err.path || "unknown";
-                if (!validationErrors![field]) {
-                  validationErrors![field] = [];
-                }
-                validationErrors![field].push(err.message || "Validation error");
-              });
-              errorMessage = "Validation failed. Please check the form fields.";
-            } else if (errorData.error && typeof errorData.error === "object") {
-              // Format: { error: { title: ["Title is required"], price: ["Price must be a number"] } }
-              validationErrors = errorData.error;
-              errorMessage = "Validation failed. Please check the form fields.";
-            } else if (errorData.message) {
-              // Some backends return { message: "Validation failed", details: {...} }
-              errorMessage = errorData.message;
-              if (errorData.details && typeof errorData.details === "object") {
-                validationErrors = errorData.details;
+            // Check if errorData is empty or has no useful information
+            const hasErrorInfo = errorData && (
+              (errorData.errors && Array.isArray(errorData.errors) && errorData.errors.length > 0) ||
+              (errorData.error && typeof errorData.error === "object" && Object.keys(errorData.error).length > 0) ||
+              (errorData.message && errorData.message.trim().length > 0) ||
+              (errorData.details && typeof errorData.details === "object" && Object.keys(errorData.details).length > 0)
+            );
+            
+            if (!hasErrorInfo && Object.keys(errorData).length === 0) {
+              // Empty error object - provide a generic message based on status code
+              if (response.status === 400) {
+                errorMessage = "Validation failed. Please check all required fields are filled correctly.";
+              } else if (response.status === 401 || response.status === 403) {
+                errorMessage = "Authentication failed. Please log in again.";
+              } else if (response.status === 422) {
+                errorMessage = "Validation error. Please check the form fields and try again.";
+              } else if (response.status >= 500) {
+                errorMessage = "Server error. Please try again later or contact support.";
+              } else {
+                errorMessage = `Request failed with status ${response.status}. Please check the form and try again.`;
               }
             } else {
-              errorMessage = errorData.message || errorData.error || errorMessage;
+              // Handle validation errors with field details
+              if (errorData.errors && Array.isArray(errorData.errors)) {
+                // Format: [{ field: "title", message: "Title is required" }]
+                validationErrors = {};
+                errorData.errors.forEach((err: { field?: string; message?: string; path?: string }) => {
+                  const field = err.field || err.path || "unknown";
+                  if (!validationErrors![field]) {
+                    validationErrors![field] = [];
+                  }
+                  validationErrors![field].push(err.message || "Validation error");
+                });
+                errorMessage = "Validation failed. Please check the form fields.";
+              } else if (errorData.error && typeof errorData.error === "object") {
+                // Format: { error: { title: ["Title is required"], price: ["Price must be a number"] } }
+                validationErrors = errorData.error;
+                errorMessage = "Validation failed. Please check the form fields.";
+              } else if (errorData.message) {
+                // Some backends return { message: "Validation failed", details: {...} }
+                errorMessage = errorData.message;
+                if (errorData.details && typeof errorData.details === "object") {
+                  validationErrors = errorData.details;
+                }
+              } else {
+                errorMessage = errorData.message || errorData.error || errorMessage;
+              }
             }
           } catch (parseError) {
+            console.error("Failed to parse error response as JSON:", parseError);
             try {
+              // Try to read as text
               const errorText = await response.text();
+              console.error("Error response as text:", errorText.substring(0, 500));
               
               // Check if it's HTML (PHP error page)
               if (errorText.trim().startsWith("<") || errorText.includes("<br />") || errorText.includes("Fatal error") || errorText.includes("Parse error")) {
@@ -1012,11 +1039,36 @@ export const api = {
                   "PHP backend error: The server returned an error page instead of JSON. " +
                   "This usually indicates a PHP syntax error, missing file, or fatal error. " +
                   "Check your PHP error logs for details.";
-              } else {
+              } else if (errorText.trim().length > 0) {
                 errorMessage = errorText || errorMessage;
+              } else {
+                // Empty response body - provide status-based message
+                if (response.status === 400) {
+                  errorMessage = "Bad request. Please check all required fields are filled correctly.";
+                } else if (response.status === 401 || response.status === 403) {
+                  errorMessage = "Authentication failed. Please log in again.";
+                } else if (response.status === 422) {
+                  errorMessage = "Validation error. Please check the form fields and try again.";
+                } else if (response.status >= 500) {
+                  errorMessage = "Server error. Please try again later or contact support.";
+                } else {
+                  errorMessage = `Request failed with status ${response.status}. Please check the form and try again.`;
+                }
               }
-            } catch {
-              errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+            } catch (textError) {
+              console.error("Failed to read error response as text:", textError);
+              // Provide status-based message as fallback
+              if (response.status === 400) {
+                errorMessage = "Bad request. Please check all required fields are filled correctly.";
+              } else if (response.status === 401 || response.status === 403) {
+                errorMessage = "Authentication failed. Please log in again.";
+              } else if (response.status === 422) {
+                errorMessage = "Validation error. Please check the form fields and try again.";
+              } else if (response.status >= 500) {
+                errorMessage = "Server error. Please try again later or contact support.";
+              } else {
+                errorMessage = `HTTP ${response.status}: ${response.statusText || "Unknown error"}`;
+              }
             }
           }
           
@@ -1284,10 +1336,21 @@ export const api = {
             throw new Error(errorMessage || "Authentication required. Please login.");
           }
           
+          // Create error with validation errors if available
           const error = new Error(errorMessage) as Error & { validationErrors?: Record<string, string[]> };
-          if (validationErrors) {
+          if (validationErrors && Object.keys(validationErrors).length > 0) {
             error.validationErrors = validationErrors;
           }
+          
+          // Log error details for debugging
+          console.error("Throwing error:", {
+            message: errorMessage,
+            hasValidationErrors: !!(validationErrors && Object.keys(validationErrors).length > 0),
+            validationErrors: validationErrors,
+            status: response.status,
+            statusText: response.statusText
+          });
+          
           throw error;
         }
         

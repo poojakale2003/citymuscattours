@@ -47,11 +47,23 @@ const formatCurrency = (value?: number) => {
   return formatDisplayCurrency(value, "INR");
 };
 
+// Map category slugs to display names
+const getCategoryDisplayName = (category: string | null | undefined): string => {
+  if (!category) return "Uncategorized";
+  const categoryMap: Record<string, string> = {
+    "city-tours": "Tour Packages",
+    "car-rental": "Car Rental",
+    "airport-transport": "Airport Transport",
+  };
+  return categoryMap[category.toLowerCase()] || category;
+};
+
 // Map segment URL values to possible category name variations
 const segmentToCategoryMap: Record<string, string[]> = {
-  "city-tours": ["City Tours", "city-tours", "city tours", "City Tours"],
+  "city-tours": ["Tour Packages", "city-tours", "tour packages", "Tour Packages"],
   "car-rental": ["Car Rental", "car-rental", "car rental", "Car Rental"],
   "airport-transport": ["Airport Transport", "airport-transport", "airport transport", "Airport Transport"],
+  "hotel-booking": ["Hotel Booking", "hotel-booking", "hotel booking", "Hotel Booking"],
 };
 
 export default function AdminBookingsPage() {
@@ -323,7 +335,7 @@ export default function AdminBookingsPage() {
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-slate-600 sm:px-6 hidden lg:table-cell">
                         <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
-                          {booking.package_category || "Uncategorized"}
+                          {getCategoryDisplayName(booking.package_category)}
                         </span>
                       </td>
                       <td className="px-3 py-4 text-slate-600 sm:px-6 hidden md:table-cell">

@@ -5,7 +5,7 @@ import { convertAmountToDisplayCurrency, displayCurrencyCode } from "@/lib/curre
 export const siteName = "citymuscattours";
 export const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://citymuscattours.example.com";
 export const siteDescription =
-  "Discover curated city tours, premium car rentals, and seamless airport transfers with citymuscattours. Plan, book, and manage travel experiences with ease.";
+  "Discover curated tour packages, premium car rentals, and seamless airport transfers with citymuscattours. Plan, book, and manage travel experiences with ease.";
 export const defaultOgImagePath = "/assets/hero/main.jpeg";
 export const defaultKeywords = [
   "travel",
@@ -46,7 +46,7 @@ export const organizationJsonLd = {
   makesOffer: [
     {
       "@type": "Offer",
-      name: "City Tours",
+      name: "Tour Packages",
       areaServed: "Muscat",
     },
     {

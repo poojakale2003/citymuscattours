@@ -14,13 +14,10 @@ type PackageFormState = {
   category: string;
   startDate: string;
   endDate: string;
-  destination: string;
   durationDays: string;
   durationNights: string;
-  totalPeople: string;
   pricing: string;
   offerPrice: string;
-  minAge: string;
   
   // Location
   country: string;
@@ -50,7 +47,7 @@ type PackageFormState = {
   description: string;
 };
 
-const categories = ["City Tours", "Car Rental", "Airport Transport", "Cruises & Stays", "Experiences"];
+const categories = ["Tour Packages", "Car Rental", "Airport Transport", "Hotel Booking", "Cruises & Stays", "Experiences"];
 
 const activityOptions = [
   "Cultural Experiences",
@@ -129,7 +126,6 @@ const omanGovernorates = [
 const fieldNameMap: Record<string, string> = {
   title: "tourName",
   tourName: "tourName",
-  destination: "destination",
   price: "pricing",
   pricing: "pricing",
   duration: "durationDays",
@@ -174,13 +170,10 @@ export default function EditPackageClient({ packageId }: EditPackageClientProps)
     category: categories[0],
     startDate: "",
     endDate: "",
-    destination: "",
     durationDays: "",
     durationNights: "",
-    totalPeople: "",
     pricing: "",
     offerPrice: "",
-    minAge: "",
     country: "Oman",
     city: "",
     state: "",
@@ -301,13 +294,10 @@ const normalizeFaqs = (
           category: pkg.category || categories[0],
           startDate: formatDate(pkg.start_date),
           endDate: formatDate(pkg.end_date),
-          destination: pkg.destination || "",
           durationDays: pkg.duration_days ? String(pkg.duration_days) : "",
           durationNights: pkg.duration_nights ? String(pkg.duration_nights) : "",
-          totalPeople: pkg.total_people_allotted ? String(pkg.total_people_allotted) : "",
           pricing: pkg.price ? String(pkg.price) : "",
           offerPrice: pkg.offer_price ? String(pkg.offer_price) : "",
-          minAge: pkg.min_age ? String(pkg.min_age) : "",
           country: pkg.country || "Oman",
           city: pkg.city || "",
           state: pkg.state || "",
@@ -430,11 +420,6 @@ const normalizeFaqs = (
         setIsSubmitting(false);
         return;
       }
-      if (!formState.destination.trim()) {
-        setFieldErrors({ destination: ["Destination is required"] });
-        setIsSubmitting(false);
-        return;
-      }
       if (!formState.pricing || parseInt(formState.pricing, 10) <= 0) {
         setFieldErrors({ pricing: ["Valid pricing is required"] });
         setIsSubmitting(false);
@@ -453,9 +438,10 @@ const normalizeFaqs = (
 
       // Map category to backend format
       const categoryMap: Record<string, string> = {
-        "City Tours": "city-tours",
+        "Tour Packages": "city-tours",
         "Car Rental": "car-rental",
         "Airport Transport": "airport-transport",
+        "Hotel Booking": "hotel-booking",
         "Cruises & Stays": "cruises-stays",
         "Experiences": "experiences",
       };
@@ -469,7 +455,6 @@ const normalizeFaqs = (
         const formData = new FormData();
         formData.append("title", formState.tourName);
         formData.append("category", backendCategory);
-        formData.append("destination", formState.destination);
         formData.append("description", formState.description || "");
         formData.append("price", priceNumber.toString());
         formData.append("offerPrice", formState.offerPrice && offerPriceValue > 0 ? offerPriceValue.toString() : "");
@@ -478,8 +463,6 @@ const normalizeFaqs = (
         if (formState.endDate) formData.append("endDate", formState.endDate);
         if (formState.durationDays) formData.append("durationDays", formState.durationDays);
         if (formState.durationNights) formData.append("durationNights", formState.durationNights);
-        if (formState.totalPeople) formData.append("maxParticipants", formState.totalPeople);
-        if (formState.minAge) formData.append("minAge", formState.minAge);
         
         // Filter out empty highlights
         const filteredHighlights = formState.highlights.filter((h) => h.trim().length > 0);
@@ -512,7 +495,6 @@ const normalizeFaqs = (
         const packageData: Record<string, any> = {
           title: formState.tourName,
           category: backendCategory,
-          destination: formState.destination,
           description: formState.description || "",
           price: priceNumber,
         };
@@ -524,8 +506,6 @@ const normalizeFaqs = (
         if (formState.endDate) packageData.endDate = formState.endDate;
         if (formState.durationDays) packageData.durationDays = parseInt(formState.durationDays, 10);
         if (formState.durationNights) packageData.durationNights = parseInt(formState.durationNights, 10);
-        if (formState.totalPeople) packageData.maxParticipants = parseInt(formState.totalPeople, 10);
-        if (formState.minAge) packageData.minAge = parseInt(formState.minAge, 10);
         
         // Filter out empty highlights
         const filteredHighlights = formState.highlights.filter((h) => h.trim().length > 0);
@@ -670,13 +650,12 @@ const normalizeFaqs = (
 
             <div className="space-y-2">
               <label htmlFor="startDate" className="text-sm font-semibold text-slate-900">
-                Start Date *
+                Start Date
               </label>
               <input
                 id="startDate"
                 name="startDate"
                 type="date"
-                required
                 min={getTodayDate()}
                 value={formState.startDate}
                 onChange={handleChange("startDate")}
@@ -686,41 +665,17 @@ const normalizeFaqs = (
 
             <div className="space-y-2">
               <label htmlFor="endDate" className="text-sm font-semibold text-slate-900">
-                End Date *
+                End Date
               </label>
               <input
                 id="endDate"
                 name="endDate"
                 type="date"
-                required
                 min={formState.startDate || getTodayDate()}
                 value={formState.endDate}
                 onChange={handleChange("endDate")}
                 className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 shadow-sm focus:border-(--color-brand-400) focus:outline-none focus:ring-2 focus:ring-(--color-brand-200)"
               />
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="destination" className="text-sm font-semibold text-slate-900">
-                Destination *
-              </label>
-              <input
-                id="destination"
-                name="destination"
-                type="text"
-                required
-                value={formState.destination}
-                onChange={handleChange("destination")}
-                className={`w-full rounded-xl border px-4 py-3 text-sm text-slate-900 shadow-sm focus:outline-none focus:ring-2 ${
-                  fieldErrors.destination
-                    ? "border-red-300 focus:border-red-400 focus:ring-red-100"
-                    : "border-slate-200 focus:border-(--color-brand-400) focus:ring-(--color-brand-200)"
-                }`}
-                placeholder="Enter destination"
-              />
-              {fieldErrors.destination && (
-                <p className="text-xs text-red-600">{fieldErrors.destination.join(", ")}</p>
-              )}
             </div>
 
             <div className="space-y-2">
@@ -765,23 +720,6 @@ const normalizeFaqs = (
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="totalPeople" className="text-sm font-semibold text-slate-900">
-                Total Number Of Peoples Allotted *
-              </label>
-              <input
-                id="totalPeople"
-                name="totalPeople"
-                type="number"
-                required
-                min="1"
-                value={formState.totalPeople}
-                onChange={handleChange("totalPeople")}
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 shadow-sm focus:border-(--color-brand-400) focus:outline-none focus:ring-2 focus:ring-(--color-brand-200)"
-                placeholder="0"
-              />
-            </div>
-
-            <div className="space-y-2">
               <label htmlFor="pricing" className="text-sm font-semibold text-slate-900">
                 Pricing ({displayCurrencyCode}) *
               </label>
@@ -821,21 +759,6 @@ const normalizeFaqs = (
               />
             </div>
 
-            <div className="space-y-2">
-              <label htmlFor="minAge" className="text-sm font-semibold text-slate-900">
-                Min Age
-              </label>
-              <input
-                id="minAge"
-                name="minAge"
-                type="number"
-                min="0"
-                value={formState.minAge}
-                onChange={handleChange("minAge")}
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 shadow-sm focus:border-(--color-brand-400) focus:outline-none focus:ring-2 focus:ring-(--color-brand-200)"
-                placeholder="0"
-              />
-            </div>
           </div>
         </section>
 

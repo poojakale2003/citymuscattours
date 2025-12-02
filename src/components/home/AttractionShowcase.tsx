@@ -3,6 +3,7 @@ import { HiArrowUpRight } from "react-icons/hi2";
 import CityToursCards from "@/components/home/categories/CityToursCards";
 import CarRentalCards from "@/components/home/categories/CarRentalCards";
 import AirportTransportCards from "@/components/home/categories/AirportTransportCards";
+import HotelBookingCards from "@/components/home/categories/HotelBookingCards";
 
 export default function AttractionShowcase() {
   return (
@@ -10,7 +11,7 @@ export default function AttractionShowcase() {
       <div id="city-tours" className="relative mx-auto max-w-7xl space-y-10 px-4 py-10 scroll-mt-28 md:px-6 lg:px-8">
         <div className="text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[var(--color-brand-500)]">
-            City Tours
+            Tour Packages
           </p>
           <h2 className="mt-2 text-3xl font-bold text-slate-900 md:text-4xl">
             Explore curated stories in every city
@@ -77,6 +78,32 @@ export default function AttractionShowcase() {
           <div className="flex justify-center">
             <Link
               href="/airport-transport"
+              className="inline-flex items-center gap-2 rounded-full bg-[var(--color-brand-600)] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[var(--color-brand-700)]"
+            >
+              Explore More
+              <HiArrowUpRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      <div id="hotel-booking" className="relative mx-auto max-w-7xl space-y-10 px-4 py-10 scroll-mt-28 md:px-6 lg:px-8">
+        <div className="text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[var(--color-brand-500)]">
+            Hotel Booking
+          </p>
+          <h2 className="mt-2 text-3xl font-semibold text-slate-900 md:text-4xl">
+            Premium accommodations across Oman
+          </h2>
+          <p className="mx-auto mt-4 max-w-3xl text-base text-slate-600">
+            Discover luxury hotels and resorts with exclusive rates, personalized concierge services, and flexible booking options.
+          </p>
+        </div>
+        <div className="space-y-6">
+          <HotelBookingCards limit={8} />
+          <div className="flex justify-center">
+            <Link
+              href="/hotel-booking"
               className="inline-flex items-center gap-2 rounded-full bg-[var(--color-brand-600)] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[var(--color-brand-700)]"
             >
               Explore More

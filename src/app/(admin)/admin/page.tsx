@@ -46,6 +46,18 @@ const dateFormatter = new Intl.DateTimeFormat("en-OM", {
 
 const formatCurrency = (value: number) => formatDisplayCurrency(value, "INR");
 
+// Map category slugs to display names
+const getCategoryDisplayName = (category: string | null | undefined): string => {
+  if (!category) return "Uncategorized";
+  const categoryMap: Record<string, string> = {
+    "city-tours": "Tour Packages",
+    "car-rental": "Car Rental",
+    "airport-transport": "Airport Transport",
+    "hotel-booking": "Hotel Booking",
+  };
+  return categoryMap[category.toLowerCase()] || category;
+};
+
 const toNumber = (value: unknown): number => {
   if (typeof value === "number") return value;
   if (typeof value === "string") {
@@ -208,7 +220,7 @@ export default function AdminDashboardPage() {
     });
 
     return Array.from(stats.entries()).map(([category, data], index) => ({
-      label: category,
+      label: getCategoryDisplayName(category),
       value: data.count,
       revenue: data.revenue,
       color: colorPalette[index % colorPalette.length],
@@ -346,7 +358,7 @@ export default function AdminDashboardPage() {
     return sorted.map((pkg) => ({
       id: pkg.id,
       title: pkg.name,
-      type: (pkg.category ?? "Package").replace(/-/g, " "),
+      type: getCategoryDisplayName(pkg.category) || "Package",
       date: formatDate(pkg.createdAt),
       slots: pkg.total_people_allotted ? Number(pkg.total_people_allotted) : pkg.isFeatured ? 12 : 6,
       image: buildPackageImage(pkg.feature_image),
@@ -364,7 +376,7 @@ export default function AdminDashboardPage() {
       .map((pkg) => ({
         id: `#INV-${pkg.id}`,
         date: formatDate(pkg.createdAt),
-        customer: pkg.destination || pkg.category || "Travel Partner",
+        customer: pkg.destination || getCategoryDisplayName(pkg.category) || "Travel Partner",
         amount: formatCurrency(pkg.priceValue),
       }));
   }, [normalizedPackages]);
@@ -637,12 +649,12 @@ export default function AdminDashboardPage() {
       />
 
       <section className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_25px_70px_-45px_rgb(15_23_42/0.6)]">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-slate-900">Recently Added</h2>
+        <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_25px_70px_-45px_rgb(15_23_42/0.6)] sm:p-6">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-lg font-semibold text-slate-900 sm:text-xl">Recently Added</h2>
             <a
               href="/admin/packages"
-              className="rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+              className="inline-flex items-center justify-center rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900 sm:w-auto"
             >
               View all
             </a>
@@ -681,12 +693,12 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_25px_70px_-45px_rgb(15_23_42/0.6)]">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-xl font-semibold text-slate-900">Latest Invoices</h2>
+        <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_25px_70px_-45px_rgb(15_23_42/0.6)] sm:p-6">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-lg font-semibold text-slate-900 sm:text-xl">Latest Invoices</h2>
             <button
               type="button"
-              className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+              className="inline-flex items-center justify-center rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900 sm:w-auto"
             >
               Export
             </button>
@@ -715,12 +727,14 @@ export default function AdminDashboardPage() {
         </div>
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_25px_70px_-45px_rgb(15_23_42/0.6)]">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-xl font-semibold text-slate-900">Quick Actions</h2>
-          <p className="text-xs text-slate-500">Add new inventory straight from your concierge pipeline.</p>
+      <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_25px_70px_-45px_rgb(15_23_42/0.6)] sm:p-6">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-slate-900 sm:text-xl">Quick Actions</h2>
+            <p className="mt-1 text-xs text-slate-500">Add new inventory straight from your concierge pipeline.</p>
+          </div>
         </div>
-        <div className="mt-6 grid gap-4 md:grid-cols-3">
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
           {quickAdds.length === 0 && !loading ? (
             <p className="text-sm text-slate-500">No categories yet.</p>
           ) : (
@@ -739,11 +753,11 @@ export default function AdminDashboardPage() {
         </div>
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_25px_70px_-45px_rgb(15_23_42/0.6)]">
-        <div className="flex flex-wrap items-center justify-between gap-4">
+      <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_25px_70px_-45px_rgb(15_23_42/0.6)] sm:p-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-xl font-semibold text-slate-900">Recent Bookings</h2>
-            <p className="text-xs text-slate-500">
+            <h2 className="text-lg font-semibold text-slate-900 sm:text-xl">Recent Bookings</h2>
+            <p className="mt-1 text-xs text-slate-500">
               {bookings.length > 0 
                 ? `${bookings.filter(b => b.payment_status === 'paid').length} confirmed bookings (paid)`
                 : "Derived from newest packages to keep you in sync."}
@@ -751,37 +765,46 @@ export default function AdminDashboardPage() {
           </div>
           <a
             href="/admin/bookings"
-            className="rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+            className="inline-flex items-center justify-center rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900 sm:w-auto"
           >
             View all
           </a>
         </div>
         <div className="mt-6 rounded-2xl border border-slate-200">
           {upcomingBookings.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="min-w-[900px] divide-y divide-slate-200 text-sm">
+            <div className="overflow-x-auto -mx-4 sm:mx-0 sm:rounded-2xl" style={{ scrollBehavior: 'smooth', WebkitOverflowScrolling: 'touch' }}>
+              <div className="min-w-[800px] sm:min-w-full">
+                <table className="min-w-full divide-y divide-slate-200 text-sm">
                 <thead className="bg-slate-50/80 text-xs uppercase tracking-[0.14em] text-slate-500">
                   <tr>
-                    <th className="px-4 py-3 text-left sm:px-6">Booking ID</th>
-                    <th className="px-4 py-3 text-left sm:px-6">Product</th>
-                    <th className="px-4 py-3 text-left sm:px-6">Guests</th>
-                    <th className="px-4 py-3 text-left sm:px-6">Duration</th>
-                    <th className="px-4 py-3 text-right sm:px-6">Amount</th>
-                    <th className="px-4 py-3 text-left sm:px-6">Booked On</th>
-                    <th className="px-4 py-3 text-left sm:px-6">Status</th>
+                    <th className="px-3 py-3 text-left sm:px-4 md:px-6">Booking ID</th>
+                    <th className="px-3 py-3 text-left sm:px-4 md:px-6">Product</th>
+                    <th className="px-3 py-3 text-left sm:px-4 md:px-6 hidden md:table-cell">Guests</th>
+                    <th className="px-3 py-3 text-left sm:px-4 md:px-6 hidden lg:table-cell">Duration</th>
+                    <th className="px-3 py-3 text-right sm:px-4 md:px-6">Amount</th>
+                    <th className="px-3 py-3 text-left sm:px-4 md:px-6 hidden lg:table-cell">Booked On</th>
+                    <th className="px-3 py-3 text-left sm:px-4 md:px-6">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200 bg-white">
                   {upcomingBookings.map((booking) => (
                     <tr key={booking.id} className="hover:bg-slate-50/60">
-                      <td className="px-4 py-4 font-semibold text-slate-900 sm:px-6">{booking.id}</td>
-                      <td className="px-4 py-4 text-slate-600 sm:px-6">{booking.product}</td>
-                      <td className="px-4 py-4 text-slate-600 sm:px-6">{booking.guest}</td>
-                      <td className="px-4 py-4 text-slate-600 sm:px-6">{booking.days}</td>
-                      <td className="px-4 py-4 text-right font-semibold text-slate-900 sm:px-6">{booking.price}</td>
-                      <td className="px-4 py-4 text-slate-600 sm:px-6">{booking.bookedOn}</td>
-                      <td className="px-4 py-4 sm:px-6">
-                        <span className="inline-flex items-center rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-600">
+                      <td className="px-3 py-4 font-semibold text-slate-900 sm:px-4 md:px-6">{booking.id}</td>
+                      <td className="px-3 py-4 text-slate-600 sm:px-4 md:px-6">
+                        <div className="max-w-[150px] truncate sm:max-w-none" title={booking.product}>
+                          {booking.product}
+                        </div>
+                      </td>
+                      <td className="px-3 py-4 text-slate-600 sm:px-4 md:px-6 hidden md:table-cell">
+                        <div className="max-w-[150px] truncate" title={booking.guest}>
+                          {booking.guest}
+                        </div>
+                      </td>
+                      <td className="px-3 py-4 text-slate-600 sm:px-4 md:px-6 hidden lg:table-cell">{booking.days}</td>
+                      <td className="px-3 py-4 text-right font-semibold text-slate-900 sm:px-4 md:px-6">{booking.price}</td>
+                      <td className="px-3 py-4 text-slate-600 sm:px-4 md:px-6 hidden lg:table-cell">{booking.bookedOn}</td>
+                      <td className="px-3 py-4 sm:px-4 md:px-6">
+                        <span className="inline-flex items-center rounded-full bg-amber-50 px-2 py-1 text-xs font-semibold text-amber-600 sm:px-3">
                           {booking.status}
                         </span>
                       </td>
@@ -789,6 +812,7 @@ export default function AdminDashboardPage() {
                   ))}
                 </tbody>
               </table>
+              </div>
             </div>
           ) : (
             <div className="bg-white px-6 py-10 text-center">

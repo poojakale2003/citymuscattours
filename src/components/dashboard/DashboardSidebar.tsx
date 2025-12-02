@@ -24,7 +24,8 @@ const navItems = [
     icon: "calendar-days",
     children: [
       { href: "/admin/bookings", label: "All Bookings" },
-      { href: "/admin/bookings?segment=city-tours", label: "City Tours" },
+      { href: "/admin/bookings?segment=city-tours", label: "Tour Packages" },
+      { href: "/admin/bookings?segment=hotel-booking", label: "Hotel Booking" },
       { href: "/admin/bookings?segment=car-rental", label: "Car Rental" },
       { href: "/admin/bookings?segment=airport-transport", label: "Airport Transport" },
     ],

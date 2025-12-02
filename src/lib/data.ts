@@ -1,7 +1,7 @@
 export const serviceCategories = [
   {
     id: "city-tours",
-    title: "Curated City Tours",
+    title: "Curated Tour Packages",
     description:
       "Immersive cultural experiences, guided by locals who know every hidden gem.",
     image: "/assets/hero/city-tours.jpg",
@@ -25,6 +25,15 @@ export const serviceCategories = [
     image: "/assets/hero/airport-transport.jpg",
     href: "/airport-transport",
     metrics: "24/7 availability",
+  },
+  {
+    id: "hotel-booking",
+    title: "Hotel Booking",
+    description:
+      "Premium accommodations with exclusive rates, concierge services, and flexible cancellation.",
+    image: "/assets/hero/hotel-booking.jpg",
+    href: "/hotel-booking",
+    metrics: "100+ properties",
   },
 ];
 
@@ -82,7 +91,7 @@ export const testimonials = [
     name: "Sofia Mendes",
     role: "Creative Director",
     quote:
-      "From airport pickup to bespoke city tours, the service felt personal and premium. Highly recommended!",
+      "From airport pickup to bespoke tour packages, the service felt personal and premium. Highly recommended!",
     image:
       "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=300&h=300&fit=crop",
   },
@@ -120,7 +129,7 @@ export const stats = [
 
 export const categoryDetails = {
   "city-tours": {
-    title: "City Tours",
+    title: "Tour Packages",
     subtitle: "Chic urban storytelling",
     description:
       "Discover iconic architecture, hidden alleys, and Michelin-starred dining with our expert local guides.",
@@ -139,6 +148,13 @@ export const categoryDetails = {
     description:
       "Experience smooth transitions with flight monitoring, dedicated hosts, and 24/7 support.",
     heroImage: "/assets/hero/airport-transport.jpg",
+  },
+  "hotel-booking": {
+    title: "Hotel Booking",
+    subtitle: "Premium accommodations",
+    description:
+      "Discover luxury hotels and resorts with exclusive rates, personalized service, and flexible booking options.",
+    heroImage: "/assets/hero/hotel-booking.jpg",
   },
 };
 
@@ -1924,5 +1940,6 @@ export const categoryPackages: Record<
       meetingPoint: "Muscat Airport",
     },
   ],
+  "hotel-booking": [],
 };
 

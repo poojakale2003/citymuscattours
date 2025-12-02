@@ -13,7 +13,7 @@ export default function CancellationPolicyPage() {
 
       <section className="mx-auto max-w-4xl space-y-6 rounded-3xl border border-slate-200 bg-white p-6 text-sm leading-relaxed text-slate-700 shadow-[0_35px_90px_-65px_rgb(15_23_42/0.6)] sm:p-10 sm:text-base">
         <div>
-          <h2 className="text-xl font-semibold text-slate-900">City Tours &amp; Transfers</h2>
+          <h2 className="text-xl font-semibold text-slate-900">Tour Packages &amp; Transfers</h2>
           <p>
             Cancel more than 72 hours before departure for a full refund. Between 72 and 24 hours, a 50% credit is issued.
             Within 24 hours we commit resources and cannot refund, but we&apos;ll always explore rescheduling.

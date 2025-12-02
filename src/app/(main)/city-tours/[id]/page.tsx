@@ -26,8 +26,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   return travelPackage
     ? buildPackageMetadata(travelPackage)
     : buildPageMetadata({
-        title: "City tour not found",
-        description: "Browse curated city tours designed by our concierge team.",
+        title: "Tour package not found",
+        description: "Browse curated tour packages designed by our concierge team.",
         path: `/city-tours/${id}`,
       });
 }

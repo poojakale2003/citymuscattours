@@ -2,10 +2,10 @@ import Link from "next/link";
 
 const services = [
   {
-    title: "City Tours",
+    title: "Tour Packages",
     badge: "Curated Itineraries",
     description: "Private guides, cultural immersion, and hidden gems tailored to your pace.",
-    cta: "Explore City Tours ",
+    cta: "Explore Tour Packages ",
     image: "/assets/hero-services/1.webp",
     href: "#city-tours",
   },
@@ -25,12 +25,20 @@ const services = [
     image: "/assets/hero-services/3.jpeg",
     href: "#airport-transport",
   },
+  {
+    title: "Hotel Booking",
+    badge: "Premium Accommodations",
+    description: "Luxury hotels and resorts with exclusive rates, concierge services, and flexible cancellation.",
+    cta: "Book a Hotel ",
+    image: "/assets/hero-services/4.avif",
+    href: "#hotel-booking",
+  },
 ];
 
 export default function HeroServices() {
   return (
-    <section className="section -mt-16 sm:-mt-20 lg:-mt-24">
-      <div className="grid gap-6 md:grid-cols-3">
+    <section className="relative mx-auto max-w-7xl px-4 py-10 -mt-16 sm:-mt-20 lg:-mt-24 md:px-6 lg:px-8">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {services.map((service) => (
           <article
             key={service.title}

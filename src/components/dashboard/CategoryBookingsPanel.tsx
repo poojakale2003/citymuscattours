@@ -23,6 +23,18 @@ const statusStyles: Record<string, string> = {
   Cancelled: "bg-rose-50 text-rose-600",
 };
 
+// Map category slugs to display names
+const getCategoryDisplayName = (category: string | null | undefined): string => {
+  if (!category) return "Uncategorized";
+  const categoryMap: Record<string, string> = {
+    "city-tours": "Tour Packages",
+    "car-rental": "Car Rental",
+    "airport-transport": "Airport Transport",
+    "hotel-booking": "Hotel Booking",
+  };
+  return categoryMap[category.toLowerCase()] || category;
+};
+
 const PAGE_SIZE = 5;
 
 export default function CategoryBookingsPanel({ categories, recordsByCategory }: CategoryBookingsPanelProps) {
@@ -98,7 +110,7 @@ export default function CategoryBookingsPanel({ categories, recordsByCategory }:
                     : "border-slate-200 text-slate-600 hover:border-slate-300 hover:text-slate-900"
                 }`}
               >
-                {category}
+                {getCategoryDisplayName(category)}
               </button>
             );
           })}

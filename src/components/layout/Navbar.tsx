@@ -28,9 +28,10 @@ const SEARCH_INDEX: SearchResult[] = getAllPackages().map((pkg) => ({
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
-  { href: "/city-tours", label: "City Tours" },
+  { href: "/city-tours", label: "Tour Packages" },
   { href: "/car-rental", label: "Car Rental" },
   { href: "/airport-transport", label: "Airport Transport" },
+  { href: "/hotel-booking", label: "Hotel Booking" },
 ];
 
 export default function Navbar() {
