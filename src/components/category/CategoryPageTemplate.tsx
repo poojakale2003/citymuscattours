@@ -86,7 +86,7 @@ export default function CategoryPageTemplate({ packages = [], children, compact 
     "Nature",
     "Food & drink",
   ];
-  const [activeFilter, setActiveFilter] = useState<string>(filterOptions[0]);
+  const [activeFilter, setActiveFilter] = useState<string>(externalActiveFilter || filterOptions[0]);
 
   // Advanced filter states
   const [selectedTime, setSelectedTime] = useState<string[]>([]);
@@ -99,6 +99,13 @@ export default function CategoryPageTemplate({ packages = [], children, compact 
   const [selectedRatings, setSelectedRatings] = useState<string[]>([]);
   const [minPrice, setMinPrice] = useState<string>("");
   const [maxPrice, setMaxPrice] = useState<string>("");
+
+  // Sync externalActiveFilter with internal state
+  useEffect(() => {
+    if (externalActiveFilter && externalActiveFilter !== activeFilter) {
+      setActiveFilter(externalActiveFilter);
+    }
+  }, [externalActiveFilter, activeFilter]);
 
   // Filter packages based on active filter and advanced filters
   const filteredPackages = useMemo(() => {
@@ -245,8 +252,33 @@ export default function CategoryPageTemplate({ packages = [], children, compact 
       });
     }
 
+    // Apply time filters
+    if (selectedTime.length > 0) {
+      filtered = filtered.filter((pkg) => {
+        const searchText = `${pkg.title} ${pkg.description} ${pkg.perks.join(" ")} ${pkg.duration}`.toLowerCase();
+        return selectedTime.some((time) => {
+          const timeLower = time.toLowerCase();
+          if (timeLower === "morning") return searchText.includes("morning") || searchText.includes("8 am") || searchText.includes("9 am") || searchText.includes("10 am") || searchText.includes("11 am");
+          if (timeLower === "afternoon") return searchText.includes("afternoon") || searchText.includes("12 pm") || searchText.includes("1 pm") || searchText.includes("2 pm") || searchText.includes("3 pm") || searchText.includes("4 pm");
+          if (timeLower === "evening") return searchText.includes("evening") || searchText.includes("5 pm") || searchText.includes("6 pm") || searchText.includes("7 pm") || searchText.includes("8 pm") || searchText.includes("night") || searchText.includes("sunset");
+          return searchText.includes(timeLower);
+        });
+      });
+    }
+
+    // Apply language filters
+    if (selectedLanguages.length > 0) {
+      filtered = filtered.filter((pkg) => {
+        const searchText = `${pkg.title} ${pkg.description} ${pkg.perks.join(" ")}`.toLowerCase();
+        return selectedLanguages.some((language) => {
+          const langLower = language.toLowerCase();
+          return searchText.includes(langLower);
+        });
+      });
+    }
+
     return filtered;
-  }, [packages, activeFilter, minPrice, maxPrice, selectedDurations, selectedServices, selectedRatings, selectedInterests, selectedCategories, selectedDestinations]);
+  }, [packages, activeFilter, minPrice, maxPrice, selectedDurations, selectedServices, selectedRatings, selectedInterests, selectedCategories, selectedDestinations, selectedTime, selectedLanguages]);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -365,6 +397,17 @@ export default function CategoryPageTemplate({ packages = [], children, compact 
     setIsFilterOpen(false);
   };
 
+  // Close modal on ESC key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isFilterOpen) {
+        setIsFilterOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [isFilterOpen]);
+
   // Only pass filtered IDs if filters are actually applied (i.e., filteredPackages differs from packages)
   const filteredPackageIds = useMemo(() => {
     // If no packages provided, return empty array
@@ -473,6 +516,11 @@ export default function CategoryPageTemplate({ packages = [], children, compact 
           role="dialog"
           aria-modal="true"
           className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 px-3 py-4 backdrop-blur-sm sm:px-4 sm:py-6"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setIsFilterOpen(false);
+            }
+          }}
         >
           <div className="relative flex max-h-[95vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-white shadow-[0_30px_90px_-40px_rgb(15_23_42/0.6)] sm:max-h-[92vh] sm:rounded-3xl">
             <header className="flex flex-col gap-3 border-b border-slate-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4">

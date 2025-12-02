@@ -1702,6 +1702,16 @@ export const api = {
       body: JSON.stringify(payload),
     }),
 
+  // Send Welcome Email
+  sendWelcomeEmail: (payload: {
+    email: string;
+    name?: string;
+  }) =>
+    request<{ success: boolean; message: string }>("/emails/send-welcome", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
   // Contact Leads
   createContactLead: (payload: {
     name: string;
