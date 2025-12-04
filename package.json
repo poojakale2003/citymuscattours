@@ -8,7 +8,10 @@
     "export": "next export --webpack && node scripts/fix-paths.js",
     "start": "next start",
     "lint": "eslint",
-    "serve:out": "npx --yes serve out -p 3000"
+    "serve:out": "npx --yes serve out -p 3000",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
     "next": "^16.0.3",
@@ -22,8 +25,15 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/jest": "^29.5.0",
     "eslint": "^9",
     "eslint-config-next": "16.0.1",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "ts-jest": "^29.1.0",
+    "@testing-library/react": "^14.0.0",
+    "@testing-library/jest-dom": "^6.1.0",
+    "identity-obj-proxy": "^3.0.0",
     "tailwindcss": "^4.1.17",
     "typescript": "^5"
   },
