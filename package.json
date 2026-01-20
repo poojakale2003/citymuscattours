@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "eslint",
     "serve:out": "npx --yes serve out -p 3000",
-    "test": "jest",
+    "test": "jest --watchAll=false --testTimeout=5000",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"
   },
