@@ -1,88 +1,94 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import Navbar from '../layout/Navbar';
 
-// Mock next/router
-jest.mock('next/router', () => ({
+// Mock next/navigation
+jest.mock('next/navigation', () => ({
   useRouter() {
     return {
-      route: '/',
-      pathname: '/',
-      query: '',
-      asPath: '/',
       push: jest.fn(),
-      pop: jest.fn(),
-      reload: jest.fn(),
       back: jest.fn(),
+      forward: jest.fn(),
+      refresh: jest.fn(),
       prefetch: jest.fn(),
-      beforePopState: jest.fn(),
-      events: {
-        on: jest.fn(),
-        off: jest.fn(),
-        emit: jest.fn(),
-      },
     };
+  },
+  usePathname() {
+    return '/';
   },
 }));
 
-describe('Navigation Component', () => {
-  const renderNavigation = () => {
-    // Create a mock navigation component for testing
-    const Navigation = () => (
-      <nav role="navigation" aria-label="Main navigation">
-        <ul>
-          <li><a href="/">Home</a></li>
-          <li><a href="/tours">Tours</a></li>
-          <li><a href="/about">About</a></li>
-          <li><a href="/contact">Contact</a></li>
-        </ul>
-      </nav>
-    );
-    
-    return render(<Navigation />);
+// Mock next/image
+jest.mock('next/image', () => ({
+  __esModule: true,
+  default: (props: any) => {
+    // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
+    return <img {...props} />;
+  },
+}));
+
+// Mock next/link
+jest.mock('next/link', () => ({
+  __esModule: true,
+  default: ({ children, href, ...props }: any) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+}));
+
+// Mock the packages module
+jest.mock('@/lib/packages', () => ({
+  getAllPackages: () => [],
+  formatCurrency: (price: number, currency: string) => `${currency} ${price}`,
+}));
+
+describe('Navbar Component', () => {
+  const renderNavbar = () => {
+    return render(<Navbar />);
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should render navigation menu', () => {
-    renderNavigation();
-    
-    expect(screen.getByRole('navigation')).toBeInTheDocument();
+  it('should render navbar with logo and navigation links', () => {
+    renderNavbar();
+
+    // Check for logo
+    expect(screen.getByAltText('citymuscattours logo')).toBeInTheDocument();
+
+    // Check for navigation links
     expect(screen.getByText('Home')).toBeInTheDocument();
-    expect(screen.getByText('Tours')).toBeInTheDocument();
-    expect(screen.getByText('About')).toBeInTheDocument();
-    expect(screen.getByText('Contact')).toBeInTheDocument();
+    expect(screen.getByText('Tour Packages')).toBeInTheDocument();
+    expect(screen.getByText('Car Rental')).toBeInTheDocument();
+    expect(screen.getByText('Airport Transport')).toBeInTheDocument();
+    expect(screen.getByText('Hotel Booking')).toBeInTheDocument();
   });
 
-  it('should have proper ARIA labels', () => {
-    renderNavigation();
-    
-    const nav = screen.getByRole('navigation');
-    expect(nav).toHaveAttribute('aria-label', 'Main navigation');
+  it('should have search functionality', () => {
+    renderNavbar();
+
+    // Check for search input (on desktop)
+    const searchInput = screen.getByPlaceholderText('Find places and things to do');
+    expect(searchInput).toBeInTheDocument();
+    expect(searchInput).toHaveAttribute('type', 'text');
   });
 
-  it('should have accessible links', () => {
-    renderNavigation();
-    
-    const links = screen.getAllByRole('link');
-    expect(links).toHaveLength(4);
-    
-    links.forEach(link => {
-      expect(link).toHaveAttribute('href');
-      expect(link.textContent).toBeTruthy();
-    });
+  it('should have book now button', () => {
+    renderNavbar();
+
+    const bookButton = screen.getByText('Book Now');
+    expect(bookButton).toBeInTheDocument();
+    expect(bookButton).toHaveAttribute('href', '/booking');
   });
 
-  it('should have semantic structure', () => {
-    renderNavigation();
-    
-    const nav = screen.getByRole('navigation');
-    const list = nav.querySelector('ul');
-    const listItems = nav.querySelectorAll('li');
-    
-    expect(list).toBeInTheDocument();
-    expect(listItems).toHaveLength(4);
+  it('should have mobile menu toggle', () => {
+    renderNavbar();
+
+    const menuButton = screen.getByLabelText('Toggle menu');
+    expect(menuButton).toBeInTheDocument();
+    expect(menuButton).toHaveAttribute('aria-expanded', 'false');
   });
 });

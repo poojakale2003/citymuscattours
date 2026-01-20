@@ -1,17 +1,10 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import Card from '../shared/Card';
 
 describe('Card Component', () => {
   const renderCard = (content = 'Test content') => {
-    const Card = ({ children }: { children: React.ReactNode }) => (
-      <div className="card" data-testid="card">
-        <div className="card-content">
-          {children}
-        </div>
-      </div>
-    );
-    
     return render(<Card>{content}</Card>);
   };
 
@@ -25,9 +18,10 @@ describe('Card Component', () => {
 
   it('should have correct CSS class', () => {
     renderCard();
-    
+
     const card = screen.getByTestId('card');
     expect(card).toHaveClass('card');
+    expect(card).toHaveClass('bg-white');
   });
 
   it('should render children properly', () => {

@@ -32,7 +32,23 @@ Object.defineProperty(window, 'localStorage', {
   value: localStorageMock,
 });
 
-describe('auth utilities', () => {
+describe('Authentication Utilities', () => {
+  // Mock console methods to reduce noise in test output
+  const originalConsoleLog = console.log;
+  const originalConsoleError = console.error;
+  const originalConsoleWarn = console.warn;
+  
+  beforeEach(() => {
+    console.log = jest.fn();
+    console.error = jest.fn();
+    console.warn = jest.fn();
+  });
+  
+  afterEach(() => {
+    console.log = originalConsoleLog;
+    console.error = originalConsoleError;
+    console.warn = originalConsoleWarn;
+  });
   beforeEach(() => {
     localStorage.clear();
   });

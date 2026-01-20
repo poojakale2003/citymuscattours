@@ -1,27 +1,18 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import Button from '../shared/Button';
 
 interface ButtonProps {
   children: React.ReactNode;
   onClick?: () => void;
   disabled?: boolean;
-  variant?: string;
+  variant?: 'primary' | 'secondary' | string;
+  className?: string;
 }
 
 describe('Button Component', () => {
   const renderButton = (props: Partial<ButtonProps> = {}) => {
-    const Button = ({ children, onClick, disabled = false, variant = 'primary' }: ButtonProps) => (
-      <button
-        onClick={onClick}
-        disabled={disabled}
-        className={`btn btn-${variant}`}
-        data-testid="button"
-      >
-        {children}
-      </button>
-    );
-    
     return render(<Button {...props} />);
   };
 
@@ -59,14 +50,14 @@ describe('Button Component', () => {
 
   it('should apply correct variant class', () => {
     renderButton({ children: 'Primary', variant: 'primary' });
-    
+
     const button = screen.getByTestId('button');
     expect(button).toHaveClass('btn', 'btn-primary');
   });
 
   it('should apply secondary variant class', () => {
     renderButton({ children: 'Secondary', variant: 'secondary' });
-    
+
     const button = screen.getByTestId('button');
     expect(button).toHaveClass('btn', 'btn-secondary');
   });
