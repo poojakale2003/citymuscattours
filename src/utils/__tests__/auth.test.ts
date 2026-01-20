@@ -109,7 +109,7 @@ describe('auth utilities', () => {
   describe('clearRefreshToken', () => {
     it('should clear refresh token when reason indicates invalid', () => {
       saveRefreshToken('refresh-token');
-      clearRefreshToken('Invalid refresh token');
+      clearRefreshToken('refresh token invalid');
       expect(getRefreshToken()).toBeNull();
     });
   });
