@@ -5,7 +5,6 @@ import type { ChangeEvent, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { formatNumber } from "@/lib/numbers";
 import { api } from "@/lib/api";
-import { getToken } from "@/utils/auth";
 import { displayCurrencyCode, formatDisplayCurrency } from "@/lib/currency";
 
 type PackageFormState = {
